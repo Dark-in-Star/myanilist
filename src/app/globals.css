@@ -13,6 +13,8 @@
   --score: #2e9e5b;
   --danger: #d1453b;
   --danger-soft: #fbeaea;
+  --overlay: rgb(0 0 0 / 60%);
+  --overlay-foreground: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -45,6 +47,8 @@
   --color-score: var(--score);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
+  --color-overlay: var(--overlay);
+  --color-overlay-foreground: var(--overlay-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

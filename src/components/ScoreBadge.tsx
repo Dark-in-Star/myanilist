@@ -7,7 +7,7 @@ export function ScoreBadge({ mean, size = "sm" }: { mean?: number; size?: "sm" |
       className={
         size === "lg"
           ? "inline-flex items-center gap-1.5 rounded-lg bg-surface-muted px-3 py-1.5 text-lg font-bold text-score"
-          : "inline-flex items-center gap-1 rounded-md bg-black/60 px-1.5 py-0.5 text-xs font-semibold text-white"
+          : "inline-flex items-center gap-1 rounded-md bg-overlay px-1.5 py-0.5 text-xs font-semibold text-overlay-foreground"
       }
     >
       <svg

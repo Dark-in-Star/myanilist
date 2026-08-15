@@ -20,6 +20,11 @@ export const metadata: Metadata = {
     template: "%s · MyAniList",
   },
   description: "Browse, search, and track anime and manga using the MyAnimeList API.",
+  icons: {
+    icon: "/logo.webp",
+    shortcut: "/logo.webp",
+    apple: "/logo.webp",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

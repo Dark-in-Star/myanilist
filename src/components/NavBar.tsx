@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, useState } from "react";
@@ -20,9 +21,8 @@ export function NavBar() {
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-3 sm:h-16 sm:px-6">
-        <Link href="/" className="flex items-center gap-2 font-extrabold tracking-tight text-accent">
-          <span className="rounded-md bg-accent px-2 py-1 text-sm text-accent-foreground">MAL</span>
-          <span className="hidden text-lg text-foreground sm:inline">MyAniList</span>
+        <Link href="/" className="flex items-center">
+          <Image src="/brand.webp" alt="MyAniList" width={707} height={353} priority className="h-7 w-auto sm:h-8" />
         </Link>
 
         <nav className="ml-2 hidden items-center gap-1 lg:flex">
