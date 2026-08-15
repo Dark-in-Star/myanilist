@@ -49,6 +49,10 @@ describe("formatDate", () => {
   it("formats a year-only date without a day suffix", () => {
     expect(formatDate("2023")).toBe("Jan 2023");
   });
+
+  it("formats a full ISO datetime (e.g. joined_at) instead of returning it raw", () => {
+    expect(formatDate("2021-07-16T15:17:24+00:00")).toBe("Jul 16, 2021");
+  });
 });
 
 describe("formatDateRange", () => {

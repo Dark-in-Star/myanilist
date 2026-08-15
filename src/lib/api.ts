@@ -1,4 +1,5 @@
 import "server-only";
+import { getValidAccessToken } from "./session";
 import type {
   AnimeNode,
   AnimeRankingType,
@@ -26,6 +27,14 @@ export class ApiError extends Error {
   }
 }
 
+/** Thrown by authenticated calls when the visitor has no valid MAL session. */
+export class AuthRequiredError extends Error {
+  constructor() {
+    super("Log in with MyAnimeList to see this.");
+    this.name = "AuthRequiredError";
+  }
+}
+
 type QueryValue = string | number | boolean | undefined;
 
 function buildQuery(query?: Record<string, QueryValue>): string {
@@ -43,10 +52,11 @@ interface FetchOptions {
   query?: Record<string, QueryValue>;
   revalidate?: number | false;
   cache?: RequestCache;
+  token?: string;
 }
 
 async function apiGet<T>(path: string, options: FetchOptions = {}): Promise<T> {
-  const { query, revalidate = 300, cache } = options;
+  const { query, revalidate = 300, cache, token } = options;
   const url = `${BASE_URL}${path}${buildQuery(query)}`;
 
   let response: Response;
@@ -54,6 +64,7 @@ async function apiGet<T>(path: string, options: FetchOptions = {}): Promise<T> {
     response = await fetch(url, {
       cache,
       next: cache ? undefined : { revalidate },
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
   } catch {
     throw new ApiError(503, "Could not reach myanilist-server. Is it running?");
@@ -65,6 +76,13 @@ async function apiGet<T>(path: string, options: FetchOptions = {}): Promise<T> {
   }
 
   return (await response.json()) as T;
+}
+
+/** For endpoints that must be authenticated: resolves a token or throws AuthRequiredError. */
+async function requireToken(): Promise<string> {
+  const token = await getValidAccessToken();
+  if (!token) throw new AuthRequiredError();
+  return token;
 }
 
 export const ANIME_LIST_FIELDS =
@@ -88,8 +106,10 @@ export function searchAnime(q: string, limit = 24, fields = ANIME_LIST_FIELDS, o
   return apiGet<MalListResponse<{ node: AnimeNode }>>("/anime", { query: { q, limit, offset, fields } });
 }
 
-export function getAnime(id: number, fields = ANIME_DETAIL_FIELDS) {
-  return apiGet<AnimeNode>(`/anime/${id}`, { query: { fields }, cache: "no-store" });
+export async function getAnime(id: number, fields = ANIME_DETAIL_FIELDS) {
+  // Optional auth: logged-in visitors get my_list_status back too.
+  const token = (await getValidAccessToken()) ?? undefined;
+  return apiGet<AnimeNode>(`/anime/${id}`, { query: { fields }, cache: "no-store", token });
 }
 
 export function getAnimeRanking(rankingType: AnimeRankingType, limit = 24, fields = ANIME_LIST_FIELDS, offset = 0) {
@@ -115,8 +135,9 @@ export function searchManga(q: string, limit = 24, fields = MANGA_LIST_FIELDS, o
   return apiGet<MalListResponse<{ node: MangaNode }>>("/manga", { query: { q, limit, offset, fields } });
 }
 
-export function getManga(id: number, fields = MANGA_DETAIL_FIELDS) {
-  return apiGet<MangaNode>(`/manga/${id}`, { query: { fields }, cache: "no-store" });
+export async function getManga(id: number, fields = MANGA_DETAIL_FIELDS) {
+  const token = (await getValidAccessToken()) ?? undefined;
+  return apiGet<MangaNode>(`/manga/${id}`, { query: { fields }, cache: "no-store", token });
 }
 
 export function getMangaRanking(rankingType: MangaRankingType, limit = 24, fields = MANGA_LIST_FIELDS, offset = 0) {
@@ -125,22 +146,27 @@ export function getMangaRanking(rankingType: MangaRankingType, limit = 24, field
   });
 }
 
-export function getAnimeList(fields = ANIME_LIST_FIELDS, limit = 1000) {
+export async function getAnimeList(fields = ANIME_LIST_FIELDS, limit = 1000) {
+  const token = await requireToken();
   return apiGet<MalListResponse<ListNode<AnimeNode, MyListStatus>>>("/users/@me/animelist", {
     query: { fields: `${fields},list_status`, limit },
     cache: "no-store",
+    token,
   });
 }
 
-export function getMangaList(fields = MANGA_LIST_FIELDS, limit = 1000) {
+export async function getMangaList(fields = MANGA_LIST_FIELDS, limit = 1000) {
+  const token = await requireToken();
   return apiGet<MalListResponse<ListNode<MangaNode, MyMangaListStatusNode>>>("/users/@me/mangalist", {
     query: { fields: `${fields},list_status`, limit },
     cache: "no-store",
+    token,
   });
 }
 
-export function getMyUserInfo(fields = "anime_statistics") {
-  return apiGet<MalUser>("/users/@me", { query: { fields }, cache: "no-store" });
+export async function getMyUserInfo(fields = "anime_statistics") {
+  const token = await requireToken();
+  return apiGet<MalUser>("/users/@me", { query: { fields }, cache: "no-store", token });
 }
 
 export { BASE_URL };

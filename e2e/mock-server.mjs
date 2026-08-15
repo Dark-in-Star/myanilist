@@ -85,9 +85,22 @@ function paginate(list, searchParams) {
   return { page, offset, hasMore };
 }
 
+// Mirrors myanilist-server: authenticated endpoints require the caller's own
+// Bearer token instead of a server-wide one. Any non-empty token is accepted here
+// (this is a mock), so tests only need to set a plausible-looking session cookie.
+function bearerToken(req) {
+  const header = req.headers["authorization"];
+  if (!header) return undefined;
+  const [scheme, token] = header.split(" ");
+  return scheme === "Bearer" && token ? token : undefined;
+}
+
 const server = createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", `http://localhost:${PORT}`);
   const parts = url.pathname.split("/").filter(Boolean);
+  if (process.env.MOCK_SERVER_DEBUG) {
+    console.log(`[mock] ${req.method} ${url.pathname} auth=${req.headers["authorization"] ?? "(none)"}`);
+  }
 
   if (req.method === "GET" && url.pathname === "/health") {
     return json(res, 200, { status: "ok", hasAccessToken: true });
@@ -121,11 +134,12 @@ const server = createServer(async (req, res) => {
     const id = Number(parts[1]);
     const node = ANIME.find((a) => a.id === id);
     if (!node) return json(res, 404, { error: "not_found" });
-    const status = animeListStatus.get(id);
+    const status = bearerToken(req) ? animeListStatus.get(id) : undefined;
     return json(res, 200, status ? { ...node, my_list_status: status } : node);
   }
 
   if (req.method === "PUT" && parts[0] === "anime" && parts[2] === "my_list_status") {
+    if (!bearerToken(req)) return json(res, 401, { error: "unauthorized" });
     const id = Number(parts[1]);
     const body = new URLSearchParams(await readBody(req));
     const current = animeListStatus.get(id) ?? { status: undefined, score: 0, num_episodes_watched: 0, is_rewatching: false };
@@ -141,6 +155,7 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "DELETE" && parts[0] === "anime" && parts[2] === "my_list_status") {
+    if (!bearerToken(req)) return json(res, 401, { error: "unauthorized" });
     const id = Number(parts[1]);
     animeListStatus.delete(id);
     return json(res, 204);
@@ -165,11 +180,12 @@ const server = createServer(async (req, res) => {
     const id = Number(parts[1]);
     const node = MANGA.find((m) => m.id === id);
     if (!node) return json(res, 404, { error: "not_found" });
-    const status = mangaListStatus.get(id);
+    const status = bearerToken(req) ? mangaListStatus.get(id) : undefined;
     return json(res, 200, status ? { ...node, my_list_status: status } : node);
   }
 
   if (req.method === "PUT" && parts[0] === "manga" && parts[2] === "my_list_status") {
+    if (!bearerToken(req)) return json(res, 401, { error: "unauthorized" });
     const id = Number(parts[1]);
     const body = new URLSearchParams(await readBody(req));
     const current = mangaListStatus.get(id) ?? { status: undefined, score: 0, num_chapters_read: 0, num_volumes_read: 0, is_rereading: false };
@@ -186,12 +202,14 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "DELETE" && parts[0] === "manga" && parts[2] === "my_list_status") {
+    if (!bearerToken(req)) return json(res, 401, { error: "unauthorized" });
     const id = Number(parts[1]);
     mangaListStatus.delete(id);
     return json(res, 204);
   }
 
   if (req.method === "GET" && url.pathname === "/users/@me/animelist") {
+    if (!bearerToken(req)) return json(res, 401, { error: "unauthorized" });
     const data = ANIME.filter((a) => animeListStatus.has(a.id)).map((node) => ({
       node,
       list_status: animeListStatus.get(node.id),
@@ -200,6 +218,7 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/users/@me/mangalist") {
+    if (!bearerToken(req)) return json(res, 401, { error: "unauthorized" });
     const data = MANGA.filter((m) => mangaListStatus.has(m.id)).map((node) => ({
       node,
       list_status: mangaListStatus.get(node.id),
@@ -208,6 +227,7 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/users/@me") {
+    if (!bearerToken(req)) return json(res, 401, { error: "unauthorized" });
     return json(res, 200, {
       id: 1,
       name: "Mock User",

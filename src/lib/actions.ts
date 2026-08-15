@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { BASE_URL } from "./api";
+import { getValidAccessToken } from "./session";
 import type { ListStatus, MangaListStatus } from "./types";
 
 type QueryValue = string | number | boolean | undefined;
@@ -15,6 +16,12 @@ function buildForm(fields: Record<string, QueryValue>): string {
   return params.toString();
 }
 
+async function requireToken(): Promise<string> {
+  const token = await getValidAccessToken();
+  if (!token) throw new Error("Log in with MyAnimeList to do that.");
+  return token;
+}
+
 export interface UpdateAnimeStatusInput {
   animeId: number;
   status?: ListStatus;
@@ -24,9 +31,13 @@ export interface UpdateAnimeStatusInput {
 
 export async function updateAnimeStatusAction(input: UpdateAnimeStatusInput) {
   const { animeId, ...update } = input;
+  const token = await requireToken();
   const response = await fetch(`${BASE_URL}/anime/${animeId}/my_list_status`, {
     method: "PUT",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Bearer ${token}`,
+    },
     body: buildForm(update),
   });
 
@@ -35,11 +46,14 @@ export async function updateAnimeStatusAction(input: UpdateAnimeStatusInput) {
   }
 
   revalidatePath("/mylist/anime");
-  revalidatePath(`/anime/${animeId}`);
 }
 
 export async function removeAnimeAction(animeId: number) {
-  const response = await fetch(`${BASE_URL}/anime/${animeId}/my_list_status`, { method: "DELETE" });
+  const token = await requireToken();
+  const response = await fetch(`${BASE_URL}/anime/${animeId}/my_list_status`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
   if (!response.ok && response.status !== 404) {
     throw new Error(`Failed to remove anime from list: ${response.status}`);
@@ -59,9 +73,13 @@ export interface UpdateMangaStatusInput {
 
 export async function updateMangaStatusAction(input: UpdateMangaStatusInput) {
   const { mangaId, ...update } = input;
+  const token = await requireToken();
   const response = await fetch(`${BASE_URL}/manga/${mangaId}/my_list_status`, {
     method: "PUT",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Bearer ${token}`,
+    },
     body: buildForm(update),
   });
 
@@ -74,7 +92,11 @@ export async function updateMangaStatusAction(input: UpdateMangaStatusInput) {
 }
 
 export async function removeMangaAction(mangaId: number) {
-  const response = await fetch(`${BASE_URL}/manga/${mangaId}/my_list_status`, { method: "DELETE" });
+  const token = await requireToken();
+  const response = await fetch(`${BASE_URL}/manga/${mangaId}/my_list_status`, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
   if (!response.ok && response.status !== 404) {
     throw new Error(`Failed to remove manga from list: ${response.status}`);

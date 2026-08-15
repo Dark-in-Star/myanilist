@@ -11,6 +11,18 @@ export function formatCompactNumber(value?: number): string {
 
 export function formatDate(value?: string): string {
   if (!value) return "Unknown";
+
+  // Full ISO datetime (e.g. a joined_at timestamp) — parse and display normally;
+  // it's timezone-aware, so there's no local/UTC day-shift risk to guard against.
+  if (value.includes("T")) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  }
+
+  // Plain "YYYY-MM-DD" (or "YYYY") calendar date, as used for anime/manga air dates.
+  // Constructed via the local-timezone Date() overload to avoid the classic
+  // new Date("YYYY-MM-DD") UTC-parsing off-by-one-day bug.
   const parts = value.split("-");
   const date = new Date(Number(parts[0]), Number(parts[1] ?? 1) - 1, Number(parts[2] ?? 1));
   if (Number.isNaN(date.getTime())) return value;

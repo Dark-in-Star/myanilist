@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import clsx from "clsx";
-import { ApiError, BASE_URL, getAnimeList } from "@/lib/api";
+import { AuthRequiredError, getAnimeList } from "@/lib/api";
 import { AnimeListRow } from "@/components/AnimeListRow";
 import { EmptyState } from "@/components/EmptyState";
+import { LoginPrompt } from "@/components/LoginPrompt";
 import { RevealList } from "@/components/RevealList";
 import { ANIME_LIST_STATUS_LABELS } from "@/lib/format";
 import type { ListStatus } from "@/lib/types";
@@ -31,13 +32,8 @@ export default async function MyAnimeListPage({
     const result = await getAnimeList();
     entries = result.data;
   } catch (error) {
-    if (error instanceof ApiError && (error.status === 401 || error.status === 503)) {
-      return (
-        <EmptyState
-          title="Not connected to MyAnimeList"
-          description={`myanilist-server has no access token configured. Visit ${BASE_URL}/auth/login to authenticate, then reload this page.`}
-        />
-      );
+    if (error instanceof AuthRequiredError) {
+      return <LoginPrompt description="Log in to see and manage your anime list." />;
     }
     throw error;
   }

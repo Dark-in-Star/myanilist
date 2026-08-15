@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ApiError, getAnime } from "@/lib/api";
+import { getSession } from "@/lib/session";
 import { ScoreBadge } from "@/components/ScoreBadge";
 import { InfoRow } from "@/components/InfoRow";
 import { GenreTags } from "@/components/GenreTags";
@@ -37,7 +38,7 @@ export async function generateMetadata({
 
 export default async function AnimeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const anime = await loadAnime(Number(id));
+  const [anime, session] = await Promise.all([loadAnime(Number(id)), getSession()]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -90,7 +91,12 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ id
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr]">
         <aside className="order-2 flex flex-col gap-4 lg:order-1">
-          <AnimeListStatusEditor animeId={anime.id} numEpisodes={anime.num_episodes} initial={anime.my_list_status} />
+          <AnimeListStatusEditor
+            animeId={anime.id}
+            numEpisodes={anime.num_episodes}
+            initial={anime.my_list_status}
+            isAuthenticated={Boolean(session)}
+          />
 
           <dl className="divide-y divide-border rounded-xl border border-border bg-surface px-4">
             <InfoRow label="Type">{formatMediaType(anime.media_type)}</InfoRow>

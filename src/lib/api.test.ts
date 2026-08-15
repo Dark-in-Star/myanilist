@@ -1,7 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiError, getAnimeRanking, getAnime, searchAnime } from "./api";
+
+vi.mock("./session", () => ({
+  getValidAccessToken: vi.fn(),
+}));
+
+import { getValidAccessToken } from "./session";
+import { ApiError, AuthRequiredError, getAnimeList, getAnimeRanking, getAnime, getMyUserInfo, searchAnime } from "./api";
 
 const originalFetch = global.fetch;
+const mockGetValidAccessToken = vi.mocked(getValidAccessToken);
 
 function mockFetchOnce(body: unknown, init: { ok?: boolean; status?: number } = {}) {
   const { ok = true, status = 200 } = init;
@@ -16,6 +23,7 @@ function mockFetchOnce(body: unknown, init: { ok?: boolean; status?: number } = 
 
 beforeEach(() => {
   process.env.MAL_API_BASE_URL = "http://localhost:3000";
+  mockGetValidAccessToken.mockResolvedValue(null);
 });
 
 afterEach(() => {
@@ -49,12 +57,24 @@ describe("getAnimeRanking", () => {
 });
 
 describe("getAnime", () => {
-  it("returns the parsed anime on success", async () => {
-    mockFetchOnce({ id: 1, title: "Frieren" });
+  it("returns the parsed anime on success when logged out (no Authorization header)", async () => {
+    const fetchMock = mockFetchOnce({ id: 1, title: "Frieren" });
 
     const result = await getAnime(1);
 
     expect(result).toEqual({ id: 1, title: "Frieren" });
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(init.headers).toBeUndefined();
+  });
+
+  it("forwards the session token as a Bearer header when logged in", async () => {
+    mockGetValidAccessToken.mockResolvedValue("session-token");
+    const fetchMock = mockFetchOnce({ id: 1, title: "Frieren", my_list_status: { status: "watching" } });
+
+    await getAnime(1);
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect((init.headers as Record<string, string>).Authorization).toBe("Bearer session-token");
   });
 
   it("throws an ApiError with status 404 for a missing anime", async () => {
@@ -68,5 +88,35 @@ describe("getAnime", () => {
     global.fetch = vi.fn().mockRejectedValue(new Error("network down")) as unknown as typeof fetch;
 
     await expect(getAnime(1)).rejects.toMatchObject({ status: 503 });
+  });
+});
+
+describe("getAnimeList", () => {
+  it("throws AuthRequiredError when there is no session", async () => {
+    await expect(getAnimeList()).rejects.toBeInstanceOf(AuthRequiredError);
+  });
+
+  it("sends the session token and returns the list when logged in", async () => {
+    mockGetValidAccessToken.mockResolvedValue("session-token");
+    const fetchMock = mockFetchOnce({ data: [] });
+
+    await getAnimeList();
+
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toContain("/users/@me/animelist");
+    expect((init.headers as Record<string, string>).Authorization).toBe("Bearer session-token");
+  });
+});
+
+describe("getMyUserInfo", () => {
+  it("throws AuthRequiredError when there is no session", async () => {
+    await expect(getMyUserInfo()).rejects.toBeInstanceOf(AuthRequiredError);
+  });
+
+  it("returns the profile when logged in", async () => {
+    mockGetValidAccessToken.mockResolvedValue("session-token");
+    mockFetchOnce({ id: 1, name: "tester" });
+
+    await expect(getMyUserInfo()).resolves.toEqual({ id: 1, name: "tester" });
   });
 });

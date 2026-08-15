@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { removeMangaAction, updateMangaStatusAction } from "@/lib/actions";
 import { MANGA_LIST_STATUS_LABELS } from "@/lib/format";
@@ -12,11 +13,13 @@ export function MangaListStatusEditor({
   numChapters,
   numVolumes,
   initial,
+  isAuthenticated,
 }: {
   mangaId: number;
   numChapters?: number;
   numVolumes?: number;
   initial?: MyMangaListStatusNode;
+  isAuthenticated: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<MangaListStatus | "">(initial?.status ?? "");
@@ -41,6 +44,18 @@ export function MangaListStatusEditor({
       setVolumes(0);
       setRemoved(true);
     });
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col gap-2 rounded-xl border border-dashed border-border bg-surface p-4 text-center">
+        <p className="text-sm font-semibold text-foreground">Track this manga</p>
+        <p className="text-xs text-muted">Log in with MyAnimeList to add it to your list.</p>
+        <Link href="/auth/login" className="text-xs font-semibold text-accent hover:underline">
+          Log in with MyAnimeList
+        </Link>
+      </div>
+    );
   }
 
   return (

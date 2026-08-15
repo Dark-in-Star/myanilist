@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ApiError, getManga } from "@/lib/api";
+import { getSession } from "@/lib/session";
 import { ScoreBadge } from "@/components/ScoreBadge";
 import { InfoRow } from "@/components/InfoRow";
 import { GenreTags } from "@/components/GenreTags";
@@ -32,7 +33,7 @@ export async function generateMetadata({
 
 export default async function MangaDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const manga = await loadManga(Number(id));
+  const [manga, session] = await Promise.all([loadManga(Number(id)), getSession()]);
   const authors = manga.authors?.map((a) => `${a.node.first_name} ${a.node.last_name}`.trim()).join(", ");
 
   return (
@@ -91,6 +92,7 @@ export default async function MangaDetailPage({ params }: { params: Promise<{ id
             numChapters={manga.num_chapters}
             numVolumes={manga.num_volumes}
             initial={manga.my_list_status}
+            isAuthenticated={Boolean(session)}
           />
 
           <dl className="divide-y divide-border rounded-xl border border-border bg-surface px-4">

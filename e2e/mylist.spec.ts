@@ -1,33 +1,45 @@
 import { expect, test } from "@playwright/test";
+import { loginAs } from "./auth-helpers";
 
-test.describe("My lists", () => {
-  test("my anime list renders entries or a clear not-connected message", async ({ page }) => {
+test.describe("My lists (logged out)", () => {
+  test("my anime list prompts login instead of erroring", async ({ page }) => {
     await page.goto("/mylist/anime");
-    await expect(page.getByRole("heading", { name: "My Anime List" })).toBeVisible();
-
-    const notConnected = page.getByText("Not connected to MyAnimeList");
-    const rows = page.locator('a[href^="/anime/"]');
-    const empty = page.getByText("Nothing here yet");
-
-    await expect(notConnected.or(rows.first()).or(empty)).toBeVisible();
+    await expect(page.getByText("Log in with MyAnimeList").first()).toBeVisible();
+    await expect(page.getByText("Something went wrong")).not.toBeVisible();
   });
 
-  test("my manga list renders entries or a clear not-connected message", async ({ page }) => {
+  test("my manga list prompts login instead of erroring", async ({ page }) => {
     await page.goto("/mylist/manga");
-    await expect(page.getByRole("heading", { name: "My Manga List" })).toBeVisible();
-
-    const notConnected = page.getByText("Not connected to MyAnimeList");
-    const rows = page.locator('a[href^="/manga/"]');
-    const empty = page.getByText("Nothing here yet");
-
-    await expect(notConnected.or(rows.first()).or(empty)).toBeVisible();
+    await expect(page.getByText("Log in with MyAnimeList").first()).toBeVisible();
+    await expect(page.getByText("Something went wrong")).not.toBeVisible();
   });
 
-  test("status tabs filter the anime list without erroring", async ({ page }) => {
+  test("profile page prompts login instead of erroring", async ({ page }) => {
+    await page.goto("/profile");
+    await expect(page.getByText("Log in with MyAnimeList").first()).toBeVisible();
+  });
+});
+
+test.describe("My lists (logged in)", () => {
+  test("my anime list renders real entries", async ({ page, baseURL }) => {
+    await loginAs(page, baseURL!);
     await page.goto("/mylist/anime");
 
-    const notConnected = await page.getByText("Not connected to MyAnimeList").isVisible();
-    test.skip(notConnected, "myanilist-server has no MAL access token configured");
+    await expect(page.getByRole("heading", { name: "My Anime List" })).toBeVisible();
+    await expect(page.locator('a[href^="/anime/"]').first()).toBeVisible();
+  });
+
+  test("my manga list renders real entries", async ({ page, baseURL }) => {
+    await loginAs(page, baseURL!);
+    await page.goto("/mylist/manga");
+
+    await expect(page.getByRole("heading", { name: "My Manga List" })).toBeVisible();
+    await expect(page.locator('a[href^="/manga/"]').first()).toBeVisible();
+  });
+
+  test("status tabs filter the anime list without erroring", async ({ page, baseURL }) => {
+    await loginAs(page, baseURL!);
+    await page.goto("/mylist/anime");
 
     const completedTab = page.getByRole("link", { name: /^Completed/ });
     await completedTab.scrollIntoViewIfNeeded();
@@ -36,12 +48,11 @@ test.describe("My lists", () => {
     await expect(page.getByRole("heading", { name: "My Anime List" })).toBeVisible();
   });
 
-  test("profile page renders account info or a clear not-connected message", async ({ page }) => {
+  test("profile page renders account info and stats", async ({ page, baseURL }) => {
+    await loginAs(page, baseURL!);
     await page.goto("/profile");
 
-    const notConnected = page.getByText("Not connected to MyAnimeList");
-    const stats = page.getByText("Mean Score");
-
-    await expect(notConnected.or(stats)).toBeVisible();
+    await expect(page.getByText("Mock User")).toBeVisible();
+    await expect(page.getByText("Mean Score")).toBeVisible();
   });
 });

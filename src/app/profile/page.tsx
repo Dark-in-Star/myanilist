@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { ApiError, BASE_URL, getMyUserInfo } from "@/lib/api";
-import { EmptyState } from "@/components/EmptyState";
+import Link from "next/link";
+import { AuthRequiredError, getMyUserInfo } from "@/lib/api";
+import { LoginPrompt } from "@/components/LoginPrompt";
 import { formatCompactNumber, formatDate } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Profile" };
@@ -20,13 +21,8 @@ export default async function ProfilePage() {
   try {
     user = await getMyUserInfo();
   } catch (error) {
-    if (error instanceof ApiError && (error.status === 401 || error.status === 503)) {
-      return (
-        <EmptyState
-          title="Not connected to MyAnimeList"
-          description={`myanilist-server has no access token configured. Visit ${BASE_URL}/auth/login to authenticate, then reload this page.`}
-        />
-      );
+    if (error instanceof AuthRequiredError) {
+      return <LoginPrompt description="Log in to see your MyAnimeList profile and stats." />;
     }
     throw error;
   }
@@ -39,13 +35,19 @@ export default async function ProfilePage() {
         <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full bg-surface-muted">
           {user.picture && <Image src={user.picture} alt={user.name} fill sizes="96px" className="object-cover" />}
         </div>
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-1 flex-col gap-1">
           <h1 className="text-xl font-bold sm:text-2xl">{user.name}</h1>
           <p className="text-sm text-muted">
             {user.location ? `${user.location} · ` : ""}
             {user.joined_at ? `Joined ${formatDate(user.joined_at)}` : ""}
           </p>
         </div>
+        <Link
+          href="/auth/logout"
+          className="rounded-full border border-border/60 px-4 py-2 text-sm font-semibold text-muted transition-colors hover:border-danger hover:text-danger"
+        >
+          Log out
+        </Link>
       </div>
 
       {stats && (

@@ -1,27 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import type { EmblaCarouselType } from "embla-carousel";
 
+// Embla initializes synchronously enough on mount that useSyncExternalStore's
+// hydration snapshot can desync from its live one (a real, reproducible hydration
+// mismatch). A plain deferred effect avoids that: both server and pre-effect client
+// renders agree on the "unknown yet, nothing disabled" state, and the real values
+// only ever land after mount, as a normal (not hydration-compared) update.
 function useCanScroll(emblaApi: EmblaCarouselType | undefined) {
-  const subscribe = useCallback(
-    (callback: () => void) => {
-      if (!emblaApi) return () => {};
-      emblaApi.on("select", callback);
-      emblaApi.on("reInit", callback);
-      return () => {
-        emblaApi.off("select", callback);
-        emblaApi.off("reInit", callback);
-      };
-    },
-    [emblaApi],
-  );
+  const [state, setState] = useState({ canPrev: false, canNext: false });
 
-  const canPrev = useSyncExternalStore(subscribe, () => emblaApi?.canScrollPrev() ?? false, () => false);
-  const canNext = useSyncExternalStore(subscribe, () => emblaApi?.canScrollNext() ?? false, () => false);
-  return { canPrev, canNext };
+  useEffect(() => {
+    if (!emblaApi) return;
+    const update = () => setState({ canPrev: emblaApi.canScrollPrev(), canNext: emblaApi.canScrollNext() });
+    update();
+    emblaApi.on("select", update);
+    emblaApi.on("reInit", update);
+    return () => {
+      emblaApi.off("select", update);
+      emblaApi.off("reInit", update);
+    };
+  }, [emblaApi]);
+
+  return state;
 }
 
 function ArrowButton({ direction, onClick, disabled }: { direction: "prev" | "next"; onClick: () => void; disabled: boolean }) {

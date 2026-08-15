@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { loginAs } from "./auth-helpers";
 
 test.describe("Anime browsing", () => {
   test("ranking tabs switch the active ranking type", async ({ page }) => {
@@ -29,19 +30,29 @@ test.describe("Anime browsing", () => {
     expect(page.url()).toBe(urlBefore);
   });
 
-  test("detail page shows synopsis, info panel, and a list status editor", async ({ page }) => {
+  test("detail page shows synopsis, info panel, and a login prompt when logged out", async ({ page }) => {
     await page.goto("/anime?type=all");
     await page.locator('a[href^="/anime/"]').first().click();
 
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page.getByText("Your list status")).toBeVisible();
+    await expect(page.getByText("Log in with MyAnimeList").first()).toBeVisible();
     await expect(page.getByText("Type", { exact: true })).toBeVisible();
     await expect(page.getByText("Episodes", { exact: true })).toBeVisible();
   });
 
-  test("changing the list status dropdown persists after reload, then can be removed", async ({ page }) => {
+  test("detail page shows a real list status editor when logged in", async ({ page, baseURL }) => {
+    await loginAs(page, baseURL!);
+    await page.goto("/anime?type=all");
+    await page.locator('a[href^="/anime/"]').first().click();
+
+    await expect(page.getByText("Your list status")).toBeVisible();
+    await expect(page.getByLabel("Status")).toBeVisible();
+  });
+
+  test("changing the list status dropdown persists after reload, then can be removed", async ({ page, baseURL }) => {
     // Runs against the in-memory mock server (e2e/mock-server.mjs), never the real
     // myanilist-server / a live MyAnimeList account.
+    await loginAs(page, baseURL!);
     await page.goto("/anime?type=all");
     await page.locator('a[href^="/anime/"]').first().click();
     await expect(page).toHaveURL(/\/anime\/\d+/);
