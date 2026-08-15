@@ -9,11 +9,17 @@ import { SearchBar } from "./SearchBar";
 import { ThemeToggle } from "./ThemeToggle";
 
 const LINKS = [
+  { href: "/", label: "Home" },
   { href: "/anime", label: "Anime" },
   { href: "/manga", label: "Manga" },
+  { href: "/archive", label: "Archive" },
   { href: "/mylist/anime", label: "My Anime List" },
   { href: "/mylist/manga", label: "My Manga List" },
 ];
+
+function isActive(pathname: string, href: string) {
+  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+}
 
 export function NavBar() {
   const pathname = usePathname();
@@ -33,7 +39,7 @@ export function NavBar() {
               href={link.href}
               className={clsx(
                 "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                pathname.startsWith(link.href)
+                isActive(pathname, link.href)
                   ? "bg-accent-soft text-accent"
                   : "text-muted hover:bg-surface-muted hover:text-foreground",
               )}

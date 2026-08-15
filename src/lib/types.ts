@@ -163,6 +163,9 @@ export type MangaRankingType =
   | "bypopularity"
   | "favorite";
 
+export type AnimeSeason = "winter" | "spring" | "summer" | "fall";
+export type AnimeSeasonSort = "anime_score" | "anime_num_list_users";
+
 export interface AnimeStatistics {
   num_items_watching: number;
   num_items_completed: number;

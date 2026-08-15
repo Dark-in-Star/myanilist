@@ -15,7 +15,7 @@ export function RevealList({ items, pageSize = 60 }: { items: ReactNode[]; pageS
           <button
             type="button"
             onClick={() => setCount((c) => c + pageSize)}
-            className="rounded-full border border-border bg-surface px-6 py-2.5 text-sm font-semibold text-foreground hover:border-accent hover:text-accent"
+            className="rounded-full border border-border/60 bg-surface px-6 py-2.5 text-sm font-semibold text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:text-accent hover:shadow-md active:translate-y-0"
           >
             Show more ({remaining} remaining)
           </button>

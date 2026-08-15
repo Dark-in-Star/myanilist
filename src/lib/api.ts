@@ -2,6 +2,8 @@ import "server-only";
 import type {
   AnimeNode,
   AnimeRankingType,
+  AnimeSeason,
+  AnimeSeasonSort,
   ListNode,
   MalListResponse,
   MangaNode,
@@ -82,31 +84,44 @@ export const MANGA_DETAIL_FIELDS =
   "num_list_users,num_scoring_users,nsfw,media_type,status,genres,num_volumes,num_chapters,authors{first_name,last_name}," +
   "background,related_anime,related_manga,recommendations,pictures,my_list_status";
 
-export function searchAnime(q: string, limit = 24, fields = ANIME_LIST_FIELDS) {
-  return apiGet<MalListResponse<{ node: AnimeNode }>>("/anime", { query: { q, limit, fields } });
+export function searchAnime(q: string, limit = 24, fields = ANIME_LIST_FIELDS, offset = 0) {
+  return apiGet<MalListResponse<{ node: AnimeNode }>>("/anime", { query: { q, limit, offset, fields } });
 }
 
 export function getAnime(id: number, fields = ANIME_DETAIL_FIELDS) {
   return apiGet<AnimeNode>(`/anime/${id}`, { query: { fields }, cache: "no-store" });
 }
 
-export function getAnimeRanking(rankingType: AnimeRankingType, limit = 24, fields = ANIME_LIST_FIELDS) {
+export function getAnimeRanking(rankingType: AnimeRankingType, limit = 24, fields = ANIME_LIST_FIELDS, offset = 0) {
   return apiGet<MalListResponse<RankingNode<AnimeNode>>>("/anime/ranking", {
-    query: { ranking_type: rankingType, limit, fields },
+    query: { ranking_type: rankingType, limit, offset, fields },
   });
 }
 
-export function searchManga(q: string, limit = 24, fields = MANGA_LIST_FIELDS) {
-  return apiGet<MalListResponse<{ node: MangaNode }>>("/manga", { query: { q, limit, fields } });
+export function getSeasonalAnime(
+  year: number,
+  season: AnimeSeason,
+  sort: AnimeSeasonSort = "anime_num_list_users",
+  limit = 24,
+  fields = ANIME_LIST_FIELDS,
+  offset = 0,
+) {
+  return apiGet<MalListResponse<{ node: AnimeNode }>>(`/anime/season/${year}/${season}`, {
+    query: { sort, limit, offset, fields },
+  });
+}
+
+export function searchManga(q: string, limit = 24, fields = MANGA_LIST_FIELDS, offset = 0) {
+  return apiGet<MalListResponse<{ node: MangaNode }>>("/manga", { query: { q, limit, offset, fields } });
 }
 
 export function getManga(id: number, fields = MANGA_DETAIL_FIELDS) {
   return apiGet<MangaNode>(`/manga/${id}`, { query: { fields }, cache: "no-store" });
 }
 
-export function getMangaRanking(rankingType: MangaRankingType, limit = 24, fields = MANGA_LIST_FIELDS) {
+export function getMangaRanking(rankingType: MangaRankingType, limit = 24, fields = MANGA_LIST_FIELDS, offset = 0) {
   return apiGet<MalListResponse<RankingNode<MangaNode>>>("/manga/ranking", {
-    query: { ranking_type: rankingType, limit, fields },
+    query: { ranking_type: rankingType, limit, offset, fields },
   });
 }
 

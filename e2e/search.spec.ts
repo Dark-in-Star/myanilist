@@ -5,16 +5,16 @@ test.describe("Search", () => {
     await page.goto("/");
 
     const searchInput = page.locator('input[placeholder="Search anime or manga..."]:visible').first();
-    await searchInput.fill("one piece");
+    await searchInput.fill("mock anime");
     await searchInput.press("Enter");
 
-    await expect(page).toHaveURL(/\/search\?q=one/);
+    await expect(page).toHaveURL(/\/search\?q=mock/);
     await expect(page.getByRole("heading", { name: /results for/i })).toBeVisible();
     await expect(page.locator('a[href^="/anime/"]').first()).toBeVisible();
   });
 
   test("switching to the manga tab re-runs the search against manga", async ({ page }) => {
-    await page.goto("/search?q=naruto&type=anime");
+    await page.goto("/search?q=mock&type=anime");
     await expect(page.getByRole("heading", { name: /results for/i })).toBeVisible();
 
     await page.getByRole("link", { name: "manga", exact: true }).click();

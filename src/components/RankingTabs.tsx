@@ -17,10 +17,10 @@ export function RankingTabs<T extends string>({
           key={tab.value}
           href={`${basePath}?type=${tab.value}`}
           className={clsx(
-            "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
+            "shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all duration-200",
             tab.value === active
-              ? "border-accent bg-accent text-accent-foreground"
-              : "border-border bg-surface text-muted hover:border-accent hover:text-accent",
+              ? "border-accent bg-accent text-accent-foreground shadow-sm shadow-accent/30"
+              : "border-border/60 bg-surface text-muted hover:-translate-y-0.5 hover:border-accent hover:text-accent",
           )}
         >
           {tab.label}

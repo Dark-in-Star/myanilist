@@ -7,6 +7,10 @@ import {
   formatMangaStatus,
   formatMediaType,
   formatScore,
+  formatSeasonLabel,
+  getCurrentAnimeSeason,
+  isAnimeSeason,
+  shiftSeason,
 } from "./format";
 
 describe("formatScore", () => {
@@ -88,5 +92,62 @@ describe("formatMediaType", () => {
 
   it("falls back to 'Unknown' when missing", () => {
     expect(formatMediaType(undefined)).toBe("Unknown");
+  });
+});
+
+describe("formatSeasonLabel", () => {
+  it("capitalizes each season", () => {
+    expect(formatSeasonLabel("winter")).toBe("Winter");
+    expect(formatSeasonLabel("fall")).toBe("Fall");
+  });
+});
+
+describe("isAnimeSeason", () => {
+  it("accepts the four valid seasons", () => {
+    expect(isAnimeSeason("winter")).toBe(true);
+    expect(isAnimeSeason("spring")).toBe(true);
+    expect(isAnimeSeason("summer")).toBe(true);
+    expect(isAnimeSeason("fall")).toBe(true);
+  });
+
+  it("rejects anything else", () => {
+    expect(isAnimeSeason("autumn")).toBe(false);
+    expect(isAnimeSeason(undefined)).toBe(false);
+  });
+});
+
+describe("getCurrentAnimeSeason", () => {
+  it("maps January-March to winter", () => {
+    expect(getCurrentAnimeSeason(new Date(2026, 1, 15))).toEqual({ year: 2026, season: "winter" });
+  });
+
+  it("maps April-June to spring", () => {
+    expect(getCurrentAnimeSeason(new Date(2026, 4, 15))).toEqual({ year: 2026, season: "spring" });
+  });
+
+  it("maps July-September to summer", () => {
+    expect(getCurrentAnimeSeason(new Date(2026, 7, 15))).toEqual({ year: 2026, season: "summer" });
+  });
+
+  it("maps October-December to fall", () => {
+    expect(getCurrentAnimeSeason(new Date(2026, 10, 15))).toEqual({ year: 2026, season: "fall" });
+  });
+});
+
+describe("shiftSeason", () => {
+  it("moves forward within the same year", () => {
+    expect(shiftSeason(2026, "winter", 1)).toEqual({ year: 2026, season: "spring" });
+  });
+
+  it("moves backward within the same year", () => {
+    expect(shiftSeason(2026, "summer", -1)).toEqual({ year: 2026, season: "spring" });
+  });
+
+  it("rolls over into the next year after fall", () => {
+    expect(shiftSeason(2026, "fall", 1)).toEqual({ year: 2027, season: "winter" });
+  });
+
+  it("rolls back into the previous year before winter", () => {
+    expect(shiftSeason(2026, "winter", -1)).toEqual({ year: 2025, season: "fall" });
   });
 });

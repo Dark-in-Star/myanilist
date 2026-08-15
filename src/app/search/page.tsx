@@ -3,55 +3,55 @@ import Link from "next/link";
 import { Suspense } from "react";
 import clsx from "clsx";
 import { searchAnime, searchManga } from "@/lib/api";
-import { MediaCard } from "@/components/MediaCard";
-import { MediaGrid } from "@/components/MediaGrid";
+import { loadMoreAnimeSearch, loadMoreMangaSearch } from "@/lib/browseActions";
+import { toAnimeGridItem, toMangaGridItem } from "@/lib/gridItems";
+import { MediaLoadMoreGrid } from "@/components/MediaLoadMoreGrid";
 import { GridSkeleton } from "@/components/GridSkeleton";
 import { EmptyState } from "@/components/EmptyState";
-import { LoadMoreLink } from "@/components/LoadMoreLink";
 
 export const metadata: Metadata = { title: "Search" };
 
 const PAGE_SIZE = 24;
 type MediaKind = "anime" | "manga";
 
-async function SearchResults({ q, kind, limit }: { q: string; kind: MediaKind; limit: number }) {
-  const result = kind === "anime" ? await searchAnime(q, limit) : await searchManga(q, limit);
+async function SearchResults({ q, kind }: { q: string; kind: MediaKind }) {
+  if (kind === "anime") {
+    const result = await searchAnime(q, PAGE_SIZE);
+    if (result.data.length === 0) {
+      return <EmptyState title="No results found" description={`Nothing matched "${q}". Try a different search.`} />;
+    }
+    return (
+      <MediaLoadMoreGrid
+        initialItems={result.data.map(({ node }) => toAnimeGridItem(node))}
+        initialHasMore={Boolean(result.paging?.next)}
+        loadMoreAction={loadMoreAnimeSearch.bind(null, q)}
+        pageSize={PAGE_SIZE}
+      />
+    );
+  }
 
+  const result = await searchManga(q, PAGE_SIZE);
   if (result.data.length === 0) {
     return <EmptyState title="No results found" description={`Nothing matched "${q}". Try a different search.`} />;
   }
-
   return (
-    <>
-      <MediaGrid>
-        {result.data.map(({ node }) => (
-          <MediaCard
-            key={node.id}
-            href={`/${kind}/${node.id}`}
-            title={node.title}
-            imageUrl={node.main_picture?.large ?? node.main_picture?.medium}
-            mean={node.mean}
-            mediaType={node.media_type}
-          />
-        ))}
-      </MediaGrid>
-      <LoadMoreLink
-        href={`/search?q=${encodeURIComponent(q)}&type=${kind}&limit=${limit + PAGE_SIZE}`}
-        hasMore={Boolean(result.paging?.next)}
-      />
-    </>
+    <MediaLoadMoreGrid
+      initialItems={result.data.map(({ node }) => toMangaGridItem(node))}
+      initialHasMore={Boolean(result.paging?.next)}
+      loadMoreAction={loadMoreMangaSearch.bind(null, q)}
+      pageSize={PAGE_SIZE}
+    />
   );
 }
 
 export default async function SearchPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; type?: string; limit?: string }>;
+  searchParams: Promise<{ q?: string; type?: string }>;
 }) {
   const params = await searchParams;
   const q = (params.q ?? "").trim();
   const kind: MediaKind = params.type === "manga" ? "manga" : "anime";
-  const limit = Math.min(Number(params.limit) || PAGE_SIZE, 100);
 
   return (
     <div className="flex flex-col gap-5">
@@ -77,8 +77,8 @@ export default async function SearchPage({
       {!q ? (
         <EmptyState title="Search for anime or manga" description="Use the search bar above to get started." />
       ) : (
-        <Suspense key={`${kind}-${q}-${limit}`} fallback={<GridSkeleton />}>
-          <SearchResults q={q} kind={kind} limit={limit} />
+        <Suspense key={`${kind}-${q}`} fallback={<GridSkeleton />}>
+          <SearchResults q={q} kind={kind} />
         </Suspense>
       )}
     </div>

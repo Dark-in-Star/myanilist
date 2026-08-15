@@ -10,15 +10,17 @@ async function AnimeRankingRow({
   title,
   rankingType,
   viewAllHref,
+  priority = false,
 }: {
   title: string;
   rankingType: AnimeRankingType;
   viewAllHref: string;
+  priority?: boolean;
 }) {
   const result = await getAnimeRanking(rankingType, 12);
   return (
     <MediaRow title={title} viewAllHref={viewAllHref}>
-      {result.data.map(({ node, ranking }) => (
+      {result.data.map(({ node, ranking }, index) => (
         <MediaRowItem key={node.id}>
           <MediaCard
             href={`/anime/${node.id}`}
@@ -27,6 +29,7 @@ async function AnimeRankingRow({
             mean={node.mean}
             mediaType={node.media_type}
             rank={ranking.rank}
+            priority={priority && index === 0}
           />
         </MediaRowItem>
       ))}
@@ -79,7 +82,7 @@ export default function Home() {
       </section>
 
       <Suspense fallback={<RowSkeleton />}>
-        <AnimeRankingRow title="Currently Airing" rankingType="airing" viewAllHref="/anime?type=airing" />
+        <AnimeRankingRow title="Currently Airing" rankingType="airing" viewAllHref="/anime?type=airing" priority />
       </Suspense>
 
       <Suspense fallback={<RowSkeleton />}>

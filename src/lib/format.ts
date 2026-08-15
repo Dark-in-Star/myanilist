@@ -1,4 +1,4 @@
-import type { AnimeRankingType, AnimeStatus, MangaRankingType, MangaStatus } from "./types";
+import type { AnimeRankingType, AnimeSeason, AnimeStatus, MangaRankingType, MangaStatus } from "./types";
 
 export function formatScore(mean?: number): string {
   return mean !== undefined ? mean.toFixed(2) : "N/A";
@@ -93,3 +93,36 @@ export const MANGA_RANKING_TABS: { value: MangaRankingType; label: string }[] = 
   { value: "bypopularity", label: "Popularity" },
   { value: "favorite", label: "Favorites" },
 ];
+
+export const SEASON_ORDER: AnimeSeason[] = ["winter", "spring", "summer", "fall"];
+
+const SEASON_LABELS: Record<AnimeSeason, string> = {
+  winter: "Winter",
+  spring: "Spring",
+  summer: "Summer",
+  fall: "Fall",
+};
+
+export function formatSeasonLabel(season: AnimeSeason): string {
+  return SEASON_LABELS[season];
+}
+
+export function isAnimeSeason(value: string | undefined): value is AnimeSeason {
+  return SEASON_ORDER.includes(value as AnimeSeason);
+}
+
+export function getCurrentAnimeSeason(date: Date = new Date()): { year: number; season: AnimeSeason } {
+  const month = date.getMonth();
+  const year = date.getFullYear();
+  if (month <= 2) return { year, season: "winter" };
+  if (month <= 5) return { year, season: "spring" };
+  if (month <= 8) return { year, season: "summer" };
+  return { year, season: "fall" };
+}
+
+export function shiftSeason(year: number, season: AnimeSeason, direction: 1 | -1): { year: number; season: AnimeSeason } {
+  const index = SEASON_ORDER.indexOf(season) + direction;
+  if (index < 0) return { year: year - 1, season: SEASON_ORDER[SEASON_ORDER.length - 1] };
+  if (index >= SEASON_ORDER.length) return { year: year + 1, season: SEASON_ORDER[0] };
+  return { year, season: SEASON_ORDER[index] };
+}
