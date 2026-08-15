@@ -6,6 +6,9 @@ import { useState, useTransition } from "react";
 import { removeAnimeAction, updateAnimeStatusAction } from "@/lib/actions";
 import { ANIME_LIST_STATUS_LABELS } from "@/lib/format";
 import type { AnimeNode, ListStatus, MyListStatus } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const STATUS_OPTIONS = Object.entries(ANIME_LIST_STATUS_LABELS) as [ListStatus, string][];
 
@@ -43,43 +46,49 @@ export function AnimeListRow({ node, listStatus }: { node: AnimeNode; listStatus
         </Link>
 
         <div className="flex flex-wrap items-center gap-2">
-          <select
+          <Select
             value={status}
-            onChange={(e) => {
-              const next = e.target.value as ListStatus;
+            onValueChange={(next: ListStatus) => {
               setStatus(next);
               save({ status: next });
             }}
             disabled={isPending}
-            className="rounded-md border border-border bg-surface-muted px-2 py-1 text-xs font-medium text-foreground sm:text-sm"
           >
-            {STATUS_OPTIONS.map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger size="sm" className="bg-surface-muted text-xs font-medium text-foreground sm:text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {STATUS_OPTIONS.map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <select
-            value={score}
-            onChange={(e) => {
-              const next = Number(e.target.value);
-              setScore(next);
-              save({ score: next });
+          <Select
+            value={String(score)}
+            onValueChange={(next) => {
+              const value = Number(next);
+              setScore(value);
+              save({ score: value });
             }}
             disabled={isPending}
-            className="rounded-md border border-border bg-surface-muted px-2 py-1 text-xs font-medium text-foreground sm:text-sm"
-            aria-label="Score"
           >
-            {Array.from({ length: 11 }, (_, i) => i).map((n) => (
-              <option key={n} value={n}>
-                {n === 0 ? "Score" : `★ ${n}`}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger size="sm" aria-label="Score" className="bg-surface-muted text-xs font-medium text-foreground sm:text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 11 }, (_, i) => i).map((n) => (
+                <SelectItem key={n} value={String(n)}>
+                  {n === 0 ? "Score" : `★ ${n}`}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <div className="flex items-center gap-1 text-xs text-muted sm:text-sm">
-            <input
+            <Input
               type="number"
               min={0}
               max={node.num_episodes || undefined}
@@ -88,19 +97,20 @@ export function AnimeListRow({ node, listStatus }: { node: AnimeNode; listStatus
               onBlur={() => save({ num_watched_episodes: episodes })}
               disabled={isPending}
               aria-label="Episodes watched"
-              className="w-14 rounded-md border border-border bg-surface-muted px-2 py-1 text-foreground"
+              className="w-14 bg-surface-muted text-foreground"
             />
             <span>/ {node.num_episodes || "?"} ep</span>
           </div>
 
-          <button
+          <Button
             type="button"
+            variant="link"
             onClick={handleRemove}
             disabled={isPending}
-            className="ml-auto text-xs font-medium text-danger hover:underline"
+            className="ml-auto h-auto p-0 text-xs font-medium text-danger"
           >
             Remove
-          </button>
+          </Button>
         </div>
       </div>
     </div>

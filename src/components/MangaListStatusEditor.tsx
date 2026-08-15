@@ -5,6 +5,10 @@ import { useState, useTransition } from "react";
 import { removeMangaAction, updateMangaStatusAction } from "@/lib/actions";
 import { MANGA_LIST_STATUS_LABELS } from "@/lib/format";
 import type { MangaListStatus, MyMangaListStatusNode } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const STATUS_OPTIONS = Object.entries(MANGA_LIST_STATUS_LABELS) as [MangaListStatus, string][];
 
@@ -63,51 +67,57 @@ export function MangaListStatusEditor({
       <h3 className="text-sm font-semibold text-foreground">Your list status</h3>
       {removed && <p className="text-xs text-muted">Removed from your list.</p>}
 
-      <label className="flex flex-col gap-1 text-xs font-medium text-muted">
+      <Label className="flex flex-col items-stretch gap-1 text-xs font-medium text-muted">
         Status
-        <select
-          value={status}
-          onChange={(e) => {
-            const next = e.target.value as MangaListStatus | "";
+        <Select
+          value={status || undefined}
+          onValueChange={(next: MangaListStatus) => {
             setStatus(next);
-            if (next) save({ status: next });
+            save({ status: next });
           }}
           disabled={isPending}
-          className="rounded-md border border-border bg-surface-muted px-3 py-2 text-sm text-foreground"
         >
-          <option value="">Add to list...</option>
-          {STATUS_OPTIONS.map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </label>
+          <SelectTrigger className="w-full bg-surface-muted text-sm text-foreground">
+            <SelectValue placeholder="Add to list..." />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUS_OPTIONS.map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Label>
 
       <div className="grid grid-cols-3 gap-3">
-        <label className="flex flex-col gap-1 text-xs font-medium text-muted">
+        <Label className="flex flex-col items-stretch gap-1 text-xs font-medium text-muted">
           Score
-          <select
-            value={score}
-            onChange={(e) => {
-              const next = Number(e.target.value);
-              setScore(next);
-              save({ score: next });
+          <Select
+            value={String(score)}
+            onValueChange={(next) => {
+              const value = Number(next);
+              setScore(value);
+              save({ score: value });
             }}
             disabled={isPending}
-            className="rounded-md border border-border bg-surface-muted px-3 py-2 text-sm text-foreground"
           >
-            {Array.from({ length: 11 }, (_, i) => i).map((n) => (
-              <option key={n} value={n}>
-                {n === 0 ? "—" : n}
-              </option>
-            ))}
-          </select>
-        </label>
+            <SelectTrigger className="w-full bg-surface-muted text-sm text-foreground">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 11 }, (_, i) => i).map((n) => (
+                <SelectItem key={n} value={String(n)}>
+                  {n === 0 ? "—" : n}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Label>
 
-        <label className="flex flex-col gap-1 text-xs font-medium text-muted">
+        <Label className="flex flex-col items-stretch gap-1 text-xs font-medium text-muted">
           Chapters
-          <input
+          <Input
             type="number"
             min={0}
             max={numChapters || undefined}
@@ -115,13 +125,13 @@ export function MangaListStatusEditor({
             onChange={(e) => setChapters(Number(e.target.value))}
             onBlur={() => save({ num_chapters_read: chapters })}
             disabled={isPending}
-            className="w-full rounded-md border border-border bg-surface-muted px-3 py-2 text-sm text-foreground"
+            className="w-full bg-surface-muted text-sm text-foreground"
           />
-        </label>
+        </Label>
 
-        <label className="flex flex-col gap-1 text-xs font-medium text-muted">
+        <Label className="flex flex-col items-stretch gap-1 text-xs font-medium text-muted">
           Volumes
-          <input
+          <Input
             type="number"
             min={0}
             max={numVolumes || undefined}
@@ -129,20 +139,21 @@ export function MangaListStatusEditor({
             onChange={(e) => setVolumes(Number(e.target.value))}
             onBlur={() => save({ num_volumes_read: volumes })}
             disabled={isPending}
-            className="w-full rounded-md border border-border bg-surface-muted px-3 py-2 text-sm text-foreground"
+            className="w-full bg-surface-muted text-sm text-foreground"
           />
-        </label>
+        </Label>
       </div>
 
       {status && (
-        <button
+        <Button
           type="button"
+          variant="link"
           onClick={handleRemove}
           disabled={isPending}
-          className="self-start text-xs font-medium text-danger hover:underline"
+          className="h-auto self-start p-0 text-xs font-medium text-danger"
         >
           Remove from list
-        </button>
+        </Button>
       )}
     </div>
   );

@@ -8,6 +8,7 @@ import clsx from "clsx";
 import { AccountMenu } from "./AccountMenu";
 import { SearchBar } from "./SearchBar";
 import { ThemeToggle } from "./ThemeToggle";
+import { Button } from "@/components/ui/button";
 
 const LINKS = [
   { href: "/", label: "Home" },
@@ -76,12 +77,14 @@ export function NavBar({
 
           <AccountMenu isAuthenticated={isAuthenticated} pictureUrl={pictureUrl} userName={userName} />
 
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="icon"
             onClick={() => setOpen((v) => !v)}
             aria-label="Toggle menu"
             aria-expanded={open}
-            className="flex h-9 w-9 items-center justify-center rounded-md border border-border text-foreground lg:hidden"
+            className="rounded-md lg:hidden"
           >
             {open ? (
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5">
@@ -92,7 +95,7 @@ export function NavBar({
                 <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
               </svg>
             )}
-          </button>
+          </Button>
         </div>
       </div>
 

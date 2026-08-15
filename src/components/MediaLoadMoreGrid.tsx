@@ -5,6 +5,7 @@ import { MediaCard } from "./MediaCard";
 import { MediaGrid } from "./MediaGrid";
 import type { GridItem } from "@/lib/gridItems";
 import type { LoadMoreResult } from "@/lib/browseActions";
+import { Button } from "@/components/ui/button";
 
 export function MediaLoadMoreGrid({
   initialItems,
@@ -46,14 +47,15 @@ export function MediaLoadMoreGrid({
       </MediaGrid>
       {hasMore && (
         <div className="flex justify-center py-6">
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={handleLoadMore}
             disabled={isPending}
-            className="rounded-full border border-border/60 bg-surface px-6 py-2.5 text-sm font-semibold text-foreground shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:text-accent hover:shadow-md active:translate-y-0 disabled:pointer-events-none disabled:opacity-60"
+            className="h-auto rounded-full border-border/60 px-6 py-2.5 text-sm font-semibold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:text-accent hover:shadow-md active:translate-y-0 disabled:pointer-events-none disabled:opacity-60"
           >
             {isPending ? "Loading…" : "Load more"}
-          </button>
+          </Button>
         </div>
       )}
     </>
