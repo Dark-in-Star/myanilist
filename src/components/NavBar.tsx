@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Suspense, useState } from "react";
 import clsx from "clsx";
 import { SearchBar } from "./SearchBar";
+import { ThemeToggle } from "./ThemeToggle";
 
 const LINKS = [
   { href: "/anime", label: "Anime" },
@@ -22,7 +23,7 @@ export function NavBar() {
     <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-3 sm:h-16 sm:px-6">
         <Link href="/" className="flex items-center">
-          <Image src="/brand.webp" alt="MyAniList" width={707} height={353} priority className="h-7 w-auto sm:h-8" />
+          <Image src="/brand.webp" alt="MyAniList" width={707} height={353} priority className="h-10 w-auto sm:h-12" />
         </Link>
 
         <nav className="ml-2 hidden items-center gap-1 lg:flex">
@@ -47,6 +48,8 @@ export function NavBar() {
             <SearchBar />
           </Suspense>
         </div>
+
+        <ThemeToggle />
 
         <Link
           href="/profile"
