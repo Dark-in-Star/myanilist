@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { LogIn, LogOut, User, X } from "lucide-react";
@@ -18,6 +19,7 @@ export function MobileProfileSheet({
   userName?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!open) return;
@@ -36,7 +38,7 @@ export function MobileProfileSheet({
   if (!isAuthenticated) {
     return (
       <Button asChild type="button" variant="outline" size="icon" className="rounded-full lg:hidden" aria-label="Log in">
-        <Link href="/auth/login">
+        <Link href={`/auth/login?returnTo=${encodeURIComponent(pathname)}`}>
           <LogIn className="h-4 w-4" />
         </Link>
       </Button>

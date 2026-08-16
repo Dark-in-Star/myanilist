@@ -16,6 +16,7 @@ const SCORE_OPTIONS = [0, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
 export function AnimeListEditModal({
   node,
   listStatus,
+  isNew = false,
   open,
   onOpenChange,
   onSaved,
@@ -23,6 +24,8 @@ export function AnimeListEditModal({
 }: {
   node: AnimeNode;
   listStatus: MyListStatus;
+  /** True when this anime isn't on the user's list yet — swaps the modal into an "add" flow. */
+  isNew?: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaved: (update: Partial<MyListStatus>) => void;
@@ -37,6 +40,7 @@ export function AnimeListEditModal({
   const episodeOptions = Array.from({ length: (total ?? Math.max(episodes, 12)) + 1 }, (_, i) => i);
 
   function handleSave() {
+    if (!status) return;
     startTransition(async () => {
       await updateAnimeStatusAction({ animeId: node.id, status, score, num_watched_episodes: episodes });
       onSaved({ status, score, num_episodes_watched: episodes });
@@ -66,17 +70,19 @@ export function AnimeListEditModal({
             type="button"
             variant="link"
             onClick={handleSave}
-            disabled={isPending}
-            className="h-auto p-0 text-sm font-semibold text-accent"
+            disabled={isPending || !status}
+            className="h-auto p-0 text-sm font-semibold text-accent disabled:opacity-40"
           >
-            Save
+            {isNew ? "Add" : "Save"}
           </Button>
         </div>
 
         <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 py-4">
           <div>
             <DialogTitle className="text-base font-bold text-foreground">{node.title}</DialogTitle>
-            <DialogDescription className="sr-only">Edit your list entry for {node.title}</DialogDescription>
+            <DialogDescription className="text-xs text-muted">
+              {isNew ? "Add this to your list" : "Edit your list entry"}
+            </DialogDescription>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -156,17 +162,19 @@ export function AnimeListEditModal({
           </div>
         </div>
 
-        <div className="shrink-0 border-t border-border px-4 py-3">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={handleRemove}
-            disabled={isPending}
-            className="h-auto w-full justify-start gap-2 p-0 text-sm font-medium text-danger hover:bg-transparent hover:text-danger"
-          >
-            <Trash2 className="size-4" /> Remove from list
-          </Button>
-        </div>
+        {!isNew && (
+          <div className="shrink-0 border-t border-border px-4 py-3">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleRemove}
+              disabled={isPending}
+              className="h-auto w-full justify-start gap-2 p-0 text-sm font-medium text-danger hover:bg-transparent hover:text-danger"
+            >
+              <Trash2 className="size-4" /> Remove from list
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

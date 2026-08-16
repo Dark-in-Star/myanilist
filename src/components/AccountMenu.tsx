@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,10 +21,12 @@ export function AccountMenu({
   pictureUrl?: string;
   userName?: string;
 }) {
+  const pathname = usePathname();
+
   if (!isAuthenticated) {
     return (
       <Button asChild className="hidden lg:inline-flex">
-        <Link href="/auth/login">Log In</Link>
+        <Link href={`/auth/login?returnTo=${encodeURIComponent(pathname)}`}>Log In</Link>
       </Button>
     );
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useTransition } from "react";
 import { removeMangaAction, updateMangaStatusAction } from "@/lib/actions";
 import { MANGA_LIST_STATUS_LABELS } from "@/lib/format";
@@ -31,6 +32,7 @@ export function MangaListStatusEditor({
   const [chapters, setChapters] = useState(initial?.num_chapters_read ?? 0);
   const [volumes, setVolumes] = useState(initial?.num_volumes_read ?? 0);
   const [removed, setRemoved] = useState(false);
+  const pathname = usePathname();
 
   function save(next: { status?: MangaListStatus; score?: number; num_chapters_read?: number; num_volumes_read?: number }) {
     startTransition(async () => {
@@ -55,7 +57,10 @@ export function MangaListStatusEditor({
       <div className="flex flex-col gap-2 rounded-xl border border-dashed border-border bg-surface p-4 text-center">
         <p className="text-sm font-semibold text-foreground">Track this manga</p>
         <p className="text-xs text-muted">Log in with MyAnimeList to add it to your list.</p>
-        <Link href="/auth/login" className="text-xs font-semibold text-accent hover:underline">
+        <Link
+          href={`/auth/login?returnTo=${encodeURIComponent(pathname)}`}
+          className="text-xs font-semibold text-accent hover:underline"
+        >
           Log in with MyAnimeList
         </Link>
       </div>

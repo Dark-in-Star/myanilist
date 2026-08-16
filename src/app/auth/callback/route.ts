@@ -6,6 +6,7 @@ import { PKCE_COOKIE_NAME, SESSION_COOKIE_NAME, sessionCookieOptions } from "@/l
 interface PendingAuth {
   verifier: string;
   state: string;
+  returnTo?: string;
 }
 
 function parsePending(raw: string | undefined): PendingAuth | null {
@@ -49,5 +50,5 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/?auth_error=1", request.url));
   }
 
-  return NextResponse.redirect(new URL("/profile", request.url));
+  return NextResponse.redirect(new URL(pending.returnTo || "/profile", request.url));
 }

@@ -22,7 +22,7 @@ export default async function MyListPage({
       entries = result.data;
     } catch (error) {
       if (error instanceof AuthRequiredError) {
-        return <LoginPrompt description="Log in to see and manage your manga list." />;
+        return <LoginPrompt description="Log in to see and manage your manga list." returnTo="/mylist?media=manga" />;
       }
       throw error;
     }
@@ -36,7 +36,7 @@ export default async function MyListPage({
     entries = result.data;
   } catch (error) {
     if (error instanceof AuthRequiredError) {
-      return <LoginPrompt description="Log in to see and manage your anime list." />;
+      return <LoginPrompt description="Log in to see and manage your anime list." returnTo="/mylist" />;
     }
     throw error;
   }

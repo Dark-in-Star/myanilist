@@ -22,7 +22,7 @@ export default async function ProfilePage() {
     user = await getMyUserInfo();
   } catch (error) {
     if (error instanceof AuthRequiredError) {
-      return <LoginPrompt description="Log in to see your MyAnimeList profile and stats." />;
+      return <LoginPrompt description="Log in to see your MyAnimeList profile and stats." returnTo="/profile" />;
     }
     throw error;
   }
