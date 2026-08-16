@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { NavBar } from "@/components/NavBar";
 import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
+import { Providers } from "./Providers";
 import { getMyUserInfo } from "@/lib/api";
 import { getSession } from "@/lib/session";
 import "./globals.css";
@@ -68,11 +69,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <NavBar isAuthenticated={Boolean(session)} pictureUrl={pictureUrl} userName={userName} />
-        <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 sm:px-6 sm:py-8">{children}</main>
-        <Footer />
-        <div className="h-16 lg:hidden" aria-hidden="true" />
-        <BottomNav />
+        <Providers>
+          <NavBar isAuthenticated={Boolean(session)} pictureUrl={pictureUrl} userName={userName} />
+          <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 sm:px-6 sm:py-8">{children}</main>
+          <Footer />
+          <div className="h-16 lg:hidden" aria-hidden="true" />
+          <BottomNav />
+        </Providers>
       </body>
     </html>
   );

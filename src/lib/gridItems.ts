@@ -1,4 +1,4 @@
-import type { AnimeNode, MangaNode } from "./types";
+import type { AnimeNode, Genre, MangaNode } from "./types";
 
 export interface GridItem {
   id: number;
@@ -8,6 +8,8 @@ export interface GridItem {
   mean?: number;
   mediaType?: string;
   rank?: number;
+  genres?: Genre[];
+  startDate?: string;
 }
 
 export function toAnimeGridItem(node: AnimeNode, rank?: number): GridItem {
@@ -19,6 +21,8 @@ export function toAnimeGridItem(node: AnimeNode, rank?: number): GridItem {
     mean: node.mean,
     mediaType: node.media_type,
     rank,
+    genres: node.genres,
+    startDate: node.start_date,
   };
 }
 
@@ -31,5 +35,7 @@ export function toMangaGridItem(node: MangaNode, rank?: number): GridItem {
     mean: node.mean,
     mediaType: node.media_type,
     rank,
+    genres: node.genres,
+    startDate: node.start_date,
   };
 }

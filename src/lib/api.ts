@@ -97,7 +97,7 @@ async function requireToken(): Promise<string> {
 }
 
 export const ANIME_LIST_FIELDS =
-  "id,title,main_picture,mean,media_type,status,num_episodes,start_season,genres,rank,popularity";
+  "id,title,main_picture,mean,media_type,status,num_episodes,start_season,start_date,genres,rank,popularity";
 
 export const ANIME_DETAIL_FIELDS =
   "id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity," +
@@ -106,20 +106,27 @@ export const ANIME_DETAIL_FIELDS =
   "recommendations,pictures,my_list_status";
 
 export const MANGA_LIST_FIELDS =
-  "id,title,main_picture,mean,media_type,status,num_volumes,num_chapters,genres,rank,popularity";
+  "id,title,main_picture,mean,media_type,status,num_volumes,num_chapters,start_date,genres,rank,popularity";
 
-// The my-list cards also show an English title alongside the main (Japanese) one,
-// and the list filter/sort need start_date — none of which the ranking/search field sets above request.
-export const MY_ANIME_LIST_FIELDS = `${ANIME_LIST_FIELDS},alternative_titles,start_date`;
-export const MY_MANGA_LIST_FIELDS = `${MANGA_LIST_FIELDS},alternative_titles,start_date`;
+// The my-list cards also show an English title alongside the main (Japanese) one, which the
+// ranking/search field sets above don't request.
+export const MY_ANIME_LIST_FIELDS = `${ANIME_LIST_FIELDS},alternative_titles`;
+export const MY_MANGA_LIST_FIELDS = `${MANGA_LIST_FIELDS},alternative_titles`;
 
 export const MANGA_DETAIL_FIELDS =
   "id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity," +
   "num_list_users,num_scoring_users,nsfw,media_type,status,genres,num_volumes,num_chapters,authors{first_name,last_name}," +
   "background,related_anime,related_manga,recommendations,pictures,my_list_status";
 
-export function searchAnime(q: string, limit = 24, fields = ANIME_LIST_FIELDS, offset = 0) {
-  return apiGet<MalListResponse<{ node: AnimeNode }>>("/anime", { query: { q, limit, offset, fields } });
+// MAL's client-ID-only (no user token) mode appears to always exclude NSFW-flagged
+// content (verified: searching a well-known Hentai title returns zero results with just
+// a client ID, even though the title and its genre both exist on MAL). Opportunistically
+// attaching a logged-in visitor's own token — same as getAnime/getManga already do for
+// detail pages — is the only lever this app has to surface it, and still depends on that
+// visitor's own MAL account having adult-content display enabled.
+export async function searchAnime(q: string, limit = 24, fields = ANIME_LIST_FIELDS, offset = 0) {
+  const token = (await getValidAccessToken()) ?? undefined;
+  return apiGet<MalListResponse<{ node: AnimeNode }>>("/anime", { query: { q, limit, offset, fields }, token });
 }
 
 export async function getAnime(id: number, fields = ANIME_DETAIL_FIELDS) {
@@ -128,13 +135,15 @@ export async function getAnime(id: number, fields = ANIME_DETAIL_FIELDS) {
   return apiGet<AnimeNode>(`/anime/${id}`, { query: { fields }, cache: "no-store", token });
 }
 
-export function getAnimeRanking(rankingType: AnimeRankingType, limit = 24, fields = ANIME_LIST_FIELDS, offset = 0) {
+export async function getAnimeRanking(rankingType: AnimeRankingType, limit = 24, fields = ANIME_LIST_FIELDS, offset = 0) {
+  const token = (await getValidAccessToken()) ?? undefined;
   return apiGet<MalListResponse<RankingNode<AnimeNode>>>("/anime/ranking", {
     query: { ranking_type: rankingType, limit, offset, fields },
+    token,
   });
 }
 
-export function getSeasonalAnime(
+export async function getSeasonalAnime(
   year: number,
   season: AnimeSeason,
   sort: AnimeSeasonSort = "anime_num_list_users",
@@ -142,13 +151,16 @@ export function getSeasonalAnime(
   fields = ANIME_LIST_FIELDS,
   offset = 0,
 ) {
+  const token = (await getValidAccessToken()) ?? undefined;
   return apiGet<MalListResponse<{ node: AnimeNode }>>(`/anime/season/${year}/${season}`, {
     query: { sort, limit, offset, fields },
+    token,
   });
 }
 
-export function searchManga(q: string, limit = 24, fields = MANGA_LIST_FIELDS, offset = 0) {
-  return apiGet<MalListResponse<{ node: MangaNode }>>("/manga", { query: { q, limit, offset, fields } });
+export async function searchManga(q: string, limit = 24, fields = MANGA_LIST_FIELDS, offset = 0) {
+  const token = (await getValidAccessToken()) ?? undefined;
+  return apiGet<MalListResponse<{ node: MangaNode }>>("/manga", { query: { q, limit, offset, fields }, token });
 }
 
 export async function getManga(id: number, fields = MANGA_DETAIL_FIELDS) {
@@ -156,9 +168,11 @@ export async function getManga(id: number, fields = MANGA_DETAIL_FIELDS) {
   return apiGet<MangaNode>(`/manga/${id}`, { query: { fields }, cache: "no-store", token });
 }
 
-export function getMangaRanking(rankingType: MangaRankingType, limit = 24, fields = MANGA_LIST_FIELDS, offset = 0) {
+export async function getMangaRanking(rankingType: MangaRankingType, limit = 24, fields = MANGA_LIST_FIELDS, offset = 0) {
+  const token = (await getValidAccessToken()) ?? undefined;
   return apiGet<MalListResponse<RankingNode<MangaNode>>>("/manga/ranking", {
     query: { ranking_type: rankingType, limit, offset, fields },
+    token,
   });
 }
 

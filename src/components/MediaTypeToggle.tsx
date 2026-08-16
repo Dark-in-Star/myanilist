@@ -8,7 +8,15 @@ const MEDIA_OPTIONS = [
   { value: "manga", label: "Manga" },
 ] as const;
 
-export function MediaTypeToggle({ active }: { active: "anime" | "manga" }) {
+export function MediaTypeToggle({
+  active,
+  basePath = "/mylist",
+  extraParams,
+}: {
+  active: "anime" | "manga";
+  basePath?: string;
+  extraParams?: Record<string, string>;
+}) {
   const router = useRouter();
 
   return (
@@ -18,7 +26,10 @@ export function MediaTypeToggle({ active }: { active: "anime" | "manga" }) {
           key={option.value}
           type="button"
           aria-pressed={option.value === active}
-          onClick={() => router.push(`/mylist?media=${option.value}`)}
+          onClick={() => {
+            const params = new URLSearchParams({ ...extraParams, media: option.value });
+            router.push(`${basePath}?${params.toString()}`);
+          }}
           className={clsx(
             "rounded-full px-3.5 py-1.5 text-sm font-medium transition-all duration-200",
             option.value === active

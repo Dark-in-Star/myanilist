@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
 import { AnimeListRow } from "./AnimeListRow";
 import { EmptyState } from "./EmptyState";
@@ -12,7 +12,9 @@ import { ScrollableTabRow } from "./ScrollableTabRow";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ANIME_LIST_STATUS_LABELS } from "@/lib/format";
-import { DEFAULT_LIST_FILTERS, matchesListFilters, matchesQuery, type ListFilters } from "@/lib/list-filters";
+import { matchesListFilters, matchesQuery } from "@/lib/list-filters";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
+import { clearSearchAndFilters, setFilters, setQuery, setSort, setStatus, setType } from "@/lib/store/listFiltersSlice";
 import type { AnimeNode, ListNode, ListStatus, MyListStatus } from "@/lib/types";
 
 type Entry = ListNode<AnimeNode, MyListStatus>;
@@ -63,11 +65,20 @@ export function AnimeListBrowser({
   initialStatus: ListStatus | "all";
 }) {
   const [entries, setEntries] = useState(initialEntries);
-  const [status, setStatus] = useState<ListStatus | "all">(initialStatus);
-  const [type, setType] = useState("all");
-  const [sort, setSort] = useState<SortValue>("title");
-  const [filters, setFilters] = useState<ListFilters>(DEFAULT_LIST_FILTERS);
-  const [query, setQuery] = useState("");
+  const dispatch = useAppDispatch();
+  const status = useAppSelector((s) => s.listFilters.anime.status) as ListStatus | "all";
+  const type = useAppSelector((s) => s.listFilters.anime.type);
+  const sort = useAppSelector((s) => s.listFilters.anime.sort) as SortValue;
+  const filters = useAppSelector((s) => s.listFilters.anime.filters);
+  const query = useAppSelector((s) => s.listFilters.anime.query);
+
+  useEffect(() => {
+    if (initialStatus !== "all") {
+      dispatch(setStatus({ media: "anime", status: initialStatus }));
+    }
+    // Only sync an explicit deep-link status on mount — subsequent tab clicks own the state from here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const counts = useMemo(() => {
     return entries.reduce<Record<string, number>>((acc, e) => {
@@ -108,7 +119,11 @@ export function AnimeListBrowser({
           <h1 className="text-xl font-bold sm:text-2xl">My Anime List</h1>
           <MediaTypeToggle active="anime" />
         </div>
-        <ListSearchBar value={query} onChange={setQuery} placeholder="Search your anime list..." />
+        <ListSearchBar
+          value={query}
+          onChange={(value) => dispatch(setQuery({ media: "anime", query: value }))}
+          placeholder="Search your anime list..."
+        />
       </div>
 
       <ScrollableTabRow className="-mx-3 border-b border-border px-3 sm:mx-0 sm:px-0">
@@ -116,7 +131,7 @@ export function AnimeListBrowser({
           <button
             key={tab.value}
             type="button"
-            onClick={() => setStatus(tab.value)}
+            onClick={() => dispatch(setStatus({ media: "anime", status: tab.value }))}
             className={clsx(
               "-mb-px shrink-0 whitespace-nowrap border-b-2 px-2.5 py-2.5 text-sm transition-colors sm:px-3.5",
               tab.value === status
@@ -133,7 +148,7 @@ export function AnimeListBrowser({
       </ScrollableTabRow>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Select value={type} onValueChange={setType}>
+        <Select value={type} onValueChange={(value) => dispatch(setType({ media: "anime", type: value }))}>
           <SelectTrigger aria-label="Type" className="w-fit min-w-28">
             <SelectValue />
           </SelectTrigger>
@@ -146,7 +161,7 @@ export function AnimeListBrowser({
           </SelectContent>
         </Select>
 
-        <Select value={sort} onValueChange={(value) => setSort(value as SortValue)}>
+        <Select value={sort} onValueChange={(value) => dispatch(setSort({ media: "anime", sort: value }))}>
           <SelectTrigger aria-label="Sort" className="w-fit min-w-40">
             <SelectValue />
           </SelectTrigger>
@@ -162,7 +177,7 @@ export function AnimeListBrowser({
         <ListFilterButton
           nodes={statusTypeFiltered.map((e) => e.node)}
           filters={filters}
-          onChange={setFilters}
+          onChange={(value) => dispatch(setFilters({ media: "anime", filters: value }))}
         />
       </div>
 
@@ -173,10 +188,7 @@ export function AnimeListBrowser({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => {
-                setFilters(DEFAULT_LIST_FILTERS);
-                setQuery("");
-              }}
+              onClick={() => dispatch(clearSearchAndFilters({ media: "anime" }))}
             >
               Clear search &amp; filters
             </Button>

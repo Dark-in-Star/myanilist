@@ -3,7 +3,9 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { getSeasonalAnime } from "@/lib/api";
 import { loadMoreSeasonalAnime } from "@/lib/browseActions";
+import { getCachedGenres } from "@/lib/genreCache";
 import { toAnimeGridItem } from "@/lib/gridItems";
+import { collectGenreFacets } from "@/lib/list-filters";
 import { MediaLoadMoreGrid } from "@/components/MediaLoadMoreGrid";
 import { GridSkeleton } from "@/components/GridSkeleton";
 import { EmptyState } from "@/components/EmptyState";
@@ -14,9 +16,17 @@ import type { AnimeSeason } from "@/lib/types";
 export const metadata: Metadata = { title: "Archive" };
 
 const PAGE_SIZE = 24;
+// MAL's real cap on `limit` (verified live against /anime/season: 500 succeeds).
+const GENRE_SAMPLE_LIMIT = 500;
 
 async function SeasonResults({ year, season }: { year: number; season: AnimeSeason }) {
-  const result = await getSeasonalAnime(year, season, "anime_num_list_users", PAGE_SIZE);
+  const [result, allGenres] = await Promise.all([
+    getSeasonalAnime(year, season, "anime_num_list_users", PAGE_SIZE),
+    getCachedGenres(`anime-season-${year}-${season}`, async () => {
+      const genrePool = await getSeasonalAnime(year, season, "anime_num_list_users", GENRE_SAMPLE_LIMIT, "genres");
+      return collectGenreFacets(genrePool.data.map(({ node }) => node)).map(({ id, name }) => ({ id, name }));
+    }),
+  ]);
 
   if (result.data.length === 0) {
     return (
@@ -33,6 +43,8 @@ async function SeasonResults({ year, season }: { year: number; season: AnimeSeas
       initialHasMore={Boolean(result.paging?.next)}
       loadMoreAction={loadMoreSeasonalAnime.bind(null, year, season)}
       pageSize={PAGE_SIZE}
+      media="anime"
+      allGenres={allGenres}
     />
   );
 }

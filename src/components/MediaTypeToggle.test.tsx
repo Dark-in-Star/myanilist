@@ -29,4 +29,13 @@ describe("MediaTypeToggle", () => {
 
     expect(push).toHaveBeenCalledWith("/mylist?media=manga");
   });
+
+  it("navigates to a custom base path with extra params preserved", async () => {
+    const user = userEvent.setup();
+    render(<MediaTypeToggle active="anime" basePath="/browse" extraParams={{ q: "frieren" }} />);
+
+    await user.click(screen.getByRole("button", { name: "Manga" }));
+
+    expect(push).toHaveBeenCalledWith("/browse?q=frieren&media=manga");
+  });
 });

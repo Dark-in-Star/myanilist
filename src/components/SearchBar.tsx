@@ -1,5 +1,6 @@
 "use client";
 
+import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -10,14 +11,17 @@ export function SearchBar({
   onNavigate,
   autoFocus,
   className,
+  mobileCollapse,
 }: {
   onNavigate?: () => void;
   autoFocus?: boolean;
   className?: string;
+  mobileCollapse?: boolean;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [value, setValue] = useState(searchParams.get("q") ?? "");
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,16 +29,17 @@ export function SearchBar({
     if (!q) return;
     router.push(`/browse?q=${encodeURIComponent(q)}`);
     onNavigate?.();
+    setMobileOpen(false);
   }
 
-  return (
+  const form = (
     <form onSubmit={handleSubmit} className="relative w-full">
       <Input
         type="search"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Search anime or manga..."
-        autoFocus={autoFocus}
+        autoFocus={autoFocus || (mobileCollapse && mobileOpen)}
         className={cn(
           "h-9 rounded-full border-border bg-surface-muted pr-9 placeholder:text-muted focus-visible:border-accent",
           className,
@@ -53,5 +58,53 @@ export function SearchBar({
         </svg>
       </Button>
     </form>
+  );
+
+  if (!mobileCollapse) return form;
+
+  const expandedMobileForm = (
+    <form onSubmit={handleSubmit} className="relative flex-1">
+      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+      <Input
+        type="search"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="Search anime or manga..."
+        autoFocus
+        className="h-9 rounded-full border-border bg-surface-muted pl-9 placeholder:text-muted focus-visible:border-accent"
+      />
+    </form>
+  );
+
+  return (
+    <>
+      <div className="hidden sm:ml-auto sm:block sm:w-64">{form}</div>
+      <div className={cn("ml-auto sm:hidden", mobileOpen && "w-full")}>
+        {mobileOpen ? (
+          <div className="flex w-full items-center gap-1">
+            {expandedMobileForm}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Close search"
+              onClick={() => setMobileOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            aria-label="Search anime or manga"
+            onClick={() => setMobileOpen(true)}
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    </>
   );
 }

@@ -37,6 +37,21 @@ export function collectGenreFacets(nodes: { genres?: Genre[] }[]): GenreFacet[] 
   return Array.from(facets.values()).sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 }
 
+/** Same as collectGenreFacets, but seeded from the full genre taxonomy so genres with
+ * zero matches among currently-loaded nodes still show up (count 0) instead of being
+ * hidden entirely. */
+export function mergeGenreFacets(allGenres: Genre[], nodes: { genres?: Genre[] }[]): GenreFacet[] {
+  const counts = new Map<number, number>();
+  for (const node of nodes) {
+    for (const genre of node.genres ?? []) {
+      counts.set(genre.id, (counts.get(genre.id) ?? 0) + 1);
+    }
+  }
+  return allGenres
+    .map((genre) => ({ id: genre.id, name: genre.name, count: counts.get(genre.id) ?? 0 }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+}
+
 export function countActiveFilters(filters: ListFilters): number {
   let count = 0;
   if (filters.genres.length > 0) count += 1;

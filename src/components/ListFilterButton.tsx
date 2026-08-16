@@ -4,20 +4,29 @@ import { useState } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ListFilterModal } from "@/components/ListFilterModal";
-import { DEFAULT_LIST_FILTERS, collectGenreFacets, countActiveFilters, type ListFilters } from "@/lib/list-filters";
+import {
+  DEFAULT_LIST_FILTERS,
+  collectGenreFacets,
+  countActiveFilters,
+  mergeGenreFacets,
+  type ListFilters,
+} from "@/lib/list-filters";
 import type { Genre } from "@/lib/types";
 
 export function ListFilterButton({
   nodes,
+  allGenres,
   filters,
   onChange,
 }: {
   nodes: { genres?: Genre[]; mean?: number; start_date?: string }[];
+  allGenres?: Genre[];
   filters: ListFilters;
   onChange: (filters: ListFilters) => void;
 }) {
   const [open, setOpen] = useState(false);
   const activeCount = countActiveFilters(filters);
+  const genreFacets = allGenres && allGenres.length > 0 ? mergeGenreFacets(allGenres, nodes) : collectGenreFacets(nodes);
 
   return (
     <>
@@ -50,7 +59,7 @@ export function ListFilterButton({
       <ListFilterModal
         open={open}
         onOpenChange={setOpen}
-        genreFacets={collectGenreFacets(nodes)}
+        genreFacets={genreFacets}
         filters={filters}
         onApply={onChange}
       />

@@ -104,22 +104,20 @@ export function ListFilterModal({
         </DialogDescription>
 
         <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 py-5">
-          <div className="flex flex-col gap-3 border-t border-border pt-5">
-            <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-              Rating
-            </span>
-            <RangeSlider
-              min={RATING_MIN}
-              max={RATING_MAX}
-              step={0.5}
-              valueMin={draft.ratingMin}
-              valueMax={draft.ratingMax}
-              onChange={(ratingMin, ratingMax) =>
-                setDraft((prev) => ({ ...prev, ratingMin, ratingMax }))
-              }
-              formatValue={(value) => value.toFixed(1)}
-            />
-          </div>
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+            Rating
+          </span>
+          <RangeSlider
+            min={RATING_MIN}
+            max={RATING_MAX}
+            step={0.5}
+            valueMin={draft.ratingMin}
+            valueMax={draft.ratingMax}
+            onChange={(ratingMin, ratingMax) =>
+              setDraft((prev) => ({ ...prev, ratingMin, ratingMax }))
+            }
+            formatValue={(value) => value.toFixed(1)}
+          />
 
           <div className="flex flex-col gap-3 border-t border-border pt-5">
             <span className="text-xs font-semibold uppercase tracking-wide text-muted">
@@ -177,34 +175,32 @@ export function ListFilterModal({
               </div>
             </div>
           </div>
-
-          {genreFacets.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted">
-                Genres
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {genreFacets.map((genre) => (
-                  <button
-                    key={genre.id}
-                    type="button"
-                    onClick={() => toggleGenre(genre.id)}
-                    className={clsx(
-                      "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
-                      draft.genres.includes(genre.id)
-                        ? "border-accent bg-accent text-accent-foreground"
-                        : "border-border bg-surface text-muted hover:border-accent hover:text-accent",
-                    )}
-                  >
-                    {genre.name}
-                    <span className="ml-1 text-xs opacity-70">
-                      ({genre.count})
-                    </span>
-                  </button>
-                ))}
+          <div className="flex flex-col gap-3 border-t border-border pt-5">
+            {genreFacets.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+                  Genres
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {genreFacets.map((genre) => (
+                    <button
+                      key={genre.id}
+                      type="button"
+                      onClick={() => toggleGenre(genre.id)}
+                      className={clsx(
+                        "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
+                        draft.genres.includes(genre.id)
+                          ? "border-accent bg-accent text-accent-foreground"
+                          : "border-border bg-surface text-muted hover:border-accent hover:text-accent",
+                      )}
+                    >
+                      {genre.name}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         <div className="shrink-0 border-t border-border px-4 py-3">
