@@ -97,6 +97,11 @@ export const ANIME_DETAIL_FIELDS =
 export const MANGA_LIST_FIELDS =
   "id,title,main_picture,mean,media_type,status,num_volumes,num_chapters,genres,rank,popularity";
 
+// The my-list cards also show an English title alongside the main (Japanese) one,
+// which the ranking/search field sets above don't request.
+export const MY_ANIME_LIST_FIELDS = `${ANIME_LIST_FIELDS},alternative_titles`;
+export const MY_MANGA_LIST_FIELDS = `${MANGA_LIST_FIELDS},alternative_titles`;
+
 export const MANGA_DETAIL_FIELDS =
   "id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity," +
   "num_list_users,num_scoring_users,nsfw,media_type,status,genres,num_volumes,num_chapters,authors{first_name,last_name}," +
@@ -146,7 +151,7 @@ export function getMangaRanking(rankingType: MangaRankingType, limit = 24, field
   });
 }
 
-export async function getAnimeList(fields = ANIME_LIST_FIELDS, limit = 1000) {
+export async function getAnimeList(fields = MY_ANIME_LIST_FIELDS, limit = 1000) {
   const token = await requireToken();
   return apiGet<MalListResponse<ListNode<AnimeNode, MyListStatus>>>("/users/@me/animelist", {
     query: { fields: `${fields},list_status`, limit },
@@ -155,7 +160,7 @@ export async function getAnimeList(fields = ANIME_LIST_FIELDS, limit = 1000) {
   });
 }
 
-export async function getMangaList(fields = MANGA_LIST_FIELDS, limit = 1000) {
+export async function getMangaList(fields = MY_MANGA_LIST_FIELDS, limit = 1000) {
   const token = await requireToken();
   return apiGet<MalListResponse<ListNode<MangaNode, MyMangaListStatusNode>>>("/users/@me/mangalist", {
     query: { fields: `${fields},list_status`, limit },

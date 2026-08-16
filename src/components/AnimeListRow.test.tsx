@@ -112,4 +112,50 @@ describe("AnimeListRow", () => {
     expect(removeAnimeAction).toHaveBeenCalledWith(1);
     expect(onRemoved).toHaveBeenCalled();
   });
+
+  it("shows the English title, airing status, genres, MAL score, and my score", () => {
+    const richNode: AnimeNode = {
+      ...NODE,
+      alternative_titles: { en: "Eighty-Six" },
+      status: "currently_airing",
+      genres: [
+        { id: 1, name: "Action" },
+        { id: 2, name: "Drama" },
+        { id: 3, name: "Sci-Fi" },
+        { id: 4, name: "Military" },
+      ],
+      mean: 8.24,
+    };
+    render(
+      <AnimeListRow
+        node={richNode}
+        listStatus={{ ...LIST_STATUS, score: 9 }}
+        onUpdated={vi.fn()}
+        onRemoved={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Eighty-Six")).toBeInTheDocument();
+    expect(screen.getByText(/Currently Airing/)).toBeInTheDocument();
+    expect(screen.getByText("Action")).toBeInTheDocument();
+    expect(screen.getByText("Drama")).toBeInTheDocument();
+    expect(screen.getByText("Sci-Fi")).toBeInTheDocument();
+    expect(screen.getByText("+1")).toBeInTheDocument();
+    expect(screen.getByText("8.24")).toBeInTheDocument();
+    expect(screen.getByText("My 9")).toBeInTheDocument();
+  });
+
+  it("omits the English title when it duplicates the main title, and my score when unrated", () => {
+    render(
+      <AnimeListRow
+        node={{ ...NODE, alternative_titles: { en: "86" } }}
+        listStatus={LIST_STATUS}
+        onUpdated={vi.fn()}
+        onRemoved={vi.fn()}
+      />,
+    );
+
+    expect(screen.getAllByText("86")).toHaveLength(1);
+    expect(screen.queryByText(/^My /)).not.toBeInTheDocument();
+  });
 });

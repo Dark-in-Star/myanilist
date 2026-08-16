@@ -3,12 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { Pencil, Plus } from "lucide-react";
+import { Pencil, Plus, Star } from "lucide-react";
 import { updateAnimeStatusAction } from "@/lib/actions";
-import { formatMediaType, formatSeasonLabel } from "@/lib/format";
+import { formatAnimeStatus, formatMediaType, formatSeasonLabel } from "@/lib/format";
 import type { AnimeNode, MyListStatus } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { ScoreBadge } from "./ScoreBadge";
 import { AnimeListEditModal } from "./AnimeListEditModal";
+
+const MAX_VISIBLE_GENRES = 3;
 
 export function AnimeListRow({
   node,
@@ -53,11 +56,19 @@ export function AnimeListRow({
     : undefined;
   const pct = total ? Math.min(100, (episodes / total) * 100) : 0;
 
+  const englishTitle =
+    node.alternative_titles?.en && node.alternative_titles.en !== node.title ? node.alternative_titles.en : undefined;
+  const isAiring = node.status === "currently_airing";
+  const genres = node.genres ?? [];
+  const visibleGenres = genres.slice(0, MAX_VISIBLE_GENRES);
+  const extraGenreCount = genres.length - visibleGenres.length;
+  const myScore = listStatus.score ?? 0;
+
   return (
     <>
       <div
         data-testid={`anime-list-row-${node.id}`}
-        className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3 sm:gap-4"
+        className="flex items-start gap-3 rounded-xl border border-border bg-surface p-3 sm:gap-4"
       >
         <Link
           href={`/anime/${node.id}`}
@@ -68,17 +79,48 @@ export function AnimeListRow({
           )}
         </Link>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <Link
-            href={`/anime/${node.id}`}
-            className="line-clamp-2 text-sm font-semibold text-foreground hover:text-accent sm:text-base"
-          >
-            {node.title}
-          </Link>
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <div className="min-w-0">
+            <Link
+              href={`/anime/${node.id}`}
+              className="line-clamp-2 text-sm font-semibold text-foreground hover:text-accent sm:text-base"
+            >
+              {node.title}
+            </Link>
+            {englishTitle && <p className="line-clamp-1 text-xs text-muted sm:text-sm">{englishTitle}</p>}
+          </div>
+
           <p className="text-xs text-muted sm:text-sm">
             {formatMediaType(node.media_type)}
             {seasonLabel ? ` · ${seasonLabel}` : ""}
+            {isAiring && <span className="font-medium text-score"> · {formatAnimeStatus(node.status)}</span>}
           </p>
+
+          {visibleGenres.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1">
+              {visibleGenres.map((genre) => (
+                <span
+                  key={genre.id}
+                  className="rounded-full bg-surface-muted px-2 py-0.5 text-[0.65rem] font-medium text-muted sm:text-xs"
+                >
+                  {genre.name}
+                </span>
+              ))}
+              {extraGenreCount > 0 && <span className="text-[0.65rem] text-muted sm:text-xs">+{extraGenreCount}</span>}
+            </div>
+          )}
+
+          {(node.mean !== undefined || myScore > 0) && (
+            <div className="flex items-center gap-2">
+              {node.mean !== undefined && <ScoreBadge mean={node.mean} />}
+              {myScore > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-md bg-accent-soft px-1.5 py-0.5 text-xs font-semibold text-accent">
+                  <Star className="size-3" fill="currentColor" />
+                  My {myScore}
+                </span>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center gap-2">
             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-muted">
