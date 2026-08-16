@@ -97,6 +97,16 @@ export function formatMediaType(type?: string): string {
   return type.toUpperCase().replace(/_/g, " ");
 }
 
+const CHARACTER_ROLE_LABELS: Record<string, string> = {
+  MAIN: "Main",
+  SUPPORTING: "Supporting",
+  BACKGROUND: "Background",
+};
+
+export function formatCharacterRole(role: string): string {
+  return CHARACTER_ROLE_LABELS[role] ?? role;
+}
+
 export const ANIME_LIST_STATUS_LABELS: Record<string, string> = {
   watching: "Watching",
   completed: "Completed",

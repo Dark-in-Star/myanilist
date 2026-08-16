@@ -1,5 +1,5 @@
 import "server-only";
-import type { NextAiringEpisode } from "./types";
+import type { AnimeExtras, NextAiringEpisode } from "./types";
 
 const ANILIST_API_URL = "https://graphql.anilist.co";
 
@@ -58,5 +58,95 @@ export async function getNextAiringEpisode(malId: number, revalidate = 300): Pro
     episode: next.episode,
     airingAt: new Date(next.airingAt * 1000).toISOString(),
     timeUntilAiring: next.timeUntilAiring,
+  };
+}
+
+const ANIME_EXTRAS_QUERY = `
+  query ($malId: Int) {
+    Media(idMal: $malId, type: ANIME) {
+      trailer { id site }
+      characters(perPage: 12) {
+        edges {
+          role
+          node { id name { full } image { large medium } }
+          voiceActors(language: JAPANESE) { id name { full } image { large medium } }
+        }
+      }
+      staff(perPage: 10) {
+        edges {
+          role
+          node { id name { full } image { large medium } }
+        }
+      }
+    }
+  }
+`;
+
+interface AniListPerson {
+  id: number;
+  name: { full: string };
+  image?: { large?: string; medium?: string } | null;
+}
+
+interface AniListExtrasResponse {
+  data?: {
+    Media?: {
+      trailer?: { id: string; site: string } | null;
+      characters?: {
+        edges: { role: string; node: AniListPerson; voiceActors: AniListPerson[] }[];
+      } | null;
+      staff?: { edges: { role: string; node: AniListPerson }[] } | null;
+    } | null;
+  };
+  errors?: { message: string }[];
+}
+
+function personImage(person: AniListPerson): string | undefined {
+  return person.image?.large ?? person.image?.medium ?? undefined;
+}
+
+/**
+ * Trailer/characters/staff for a MAL anime id, via AniList's GraphQL API — none of
+ * this is available from MAL's own API. Fails soft (null) like getNextAiringEpisode:
+ * this is a supplementary enhancement, never worth failing the details page for.
+ */
+export async function getAnimeExtras(malId: number, revalidate = 3600): Promise<AnimeExtras | null> {
+  let response: Response;
+  try {
+    response = await fetch(ANILIST_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ query: ANIME_EXTRAS_QUERY, variables: { malId } }),
+      next: { revalidate },
+    });
+  } catch {
+    return null;
+  }
+
+  if (!response.ok) return null;
+
+  const json = (await response.json()) as AniListExtrasResponse;
+  const media = json.data?.Media;
+  if (!media) return null;
+
+  return {
+    trailer: media.trailer?.site === "youtube" && media.trailer.id ? { id: media.trailer.id } : null,
+    characters: (media.characters?.edges ?? []).map((edge) => ({
+      id: edge.node.id,
+      name: edge.node.name.full,
+      imageUrl: personImage(edge.node),
+      role: edge.role,
+      voiceActors: (edge.voiceActors ?? []).map((va) => ({
+        id: va.id,
+        name: va.name.full,
+        imageUrl: personImage(va),
+      })),
+    })),
+    staff: (media.staff?.edges ?? []).map((edge) => ({
+      id: edge.node.id,
+      name: edge.node.name.full,
+      imageUrl: personImage(edge.node),
+      role: edge.role,
+    })),
   };
 }

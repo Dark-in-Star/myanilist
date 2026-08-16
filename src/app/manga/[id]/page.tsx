@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ApiError, getManga } from "@/lib/api";
 import { getSession } from "@/lib/session";
@@ -140,10 +139,6 @@ export default async function MangaDetailPage({ params }: { params: Promise<{ id
           )}
         </div>
       </div>
-
-      <Link href="/browse?media=manga" className="text-sm font-medium text-accent hover:underline">
-        ← Back to rankings
-      </Link>
     </div>
   );
 }

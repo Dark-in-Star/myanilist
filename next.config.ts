@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         hostname: "cdn.nekosapi.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "*.anilist.co",
+        pathname: "/**",
+      },
     ],
   },
 };

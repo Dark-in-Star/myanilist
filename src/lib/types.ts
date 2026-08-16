@@ -38,6 +38,36 @@ export interface NextAiringEpisode {
   timeUntilAiring: number;
 }
 
+export interface AnimeTrailer {
+  /** YouTube video id. */
+  id: string;
+}
+
+export interface CastMember {
+  id: number;
+  name: string;
+  imageUrl?: string;
+}
+
+export interface AnimeCharacter {
+  id: number;
+  name: string;
+  imageUrl?: string;
+  role: string;
+  voiceActors: CastMember[];
+}
+
+export interface AnimeStaffMember extends CastMember {
+  role: string;
+}
+
+/** Trailer/characters/staff, sourced from AniList — MAL's API doesn't expose any of this. */
+export interface AnimeExtras {
+  trailer: AnimeTrailer | null;
+  characters: AnimeCharacter[];
+  staff: AnimeStaffMember[];
+}
+
 export type AnimeStatus = "finished_airing" | "currently_airing" | "not_yet_aired";
 export type MangaStatus = "finished" | "currently_publishing" | "not_yet_published" | "on_hiatus";
 
