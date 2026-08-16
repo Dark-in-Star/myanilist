@@ -14,11 +14,22 @@ const MEDIA_OPTIONS = [
   { value: "manga", label: "Manga" },
 ] as const;
 
-export function MediaTypeSelect({ active }: { active: "anime" | "manga" }) {
+export function MediaTypeSelect({
+  active,
+  extraParams,
+}: {
+  active: "anime" | "manga";
+  extraParams?: Record<string, string>;
+}) {
   const router = useRouter();
 
+  function handleChange(value: string) {
+    const params = new URLSearchParams({ ...extraParams, media: value });
+    router.push(`/browse?${params.toString()}`);
+  }
+
   return (
-    <Select value={active} onValueChange={(value) => router.push(`/browse?media=${value}`)}>
+    <Select value={active} onValueChange={handleChange}>
       <SelectTrigger aria-label="Media" className="w-fit min-w-32">
         <SelectValue />
       </SelectTrigger>

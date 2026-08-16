@@ -7,7 +7,6 @@ import { Suspense } from "react";
 import clsx from "clsx";
 import { AccountMenu } from "./AccountMenu";
 import { MobileProfileSheet } from "./MobileProfileSheet";
-import { MobileSearchToggle } from "./MobileSearchToggle";
 import { SearchBar } from "./SearchBar";
 import { ThemeToggle } from "./ThemeToggle";
 import { NAV_LINKS, isNavLinkActive } from "./nav-links";
@@ -60,8 +59,6 @@ export function NavBar({
           <ThemeToggle />
 
           <AccountMenu isAuthenticated={isAuthenticated} pictureUrl={pictureUrl} userName={userName} />
-
-          {!isHome && <MobileSearchToggle />}
 
           <MobileProfileSheet isAuthenticated={isAuthenticated} pictureUrl={pictureUrl} userName={userName} />
         </div>

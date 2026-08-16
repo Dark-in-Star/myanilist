@@ -20,7 +20,7 @@ export function SearchBar({
     e.preventDefault();
     const q = value.trim();
     if (!q) return;
-    router.push(`/search?q=${encodeURIComponent(q)}`);
+    router.push(`/browse?q=${encodeURIComponent(q)}`);
     onNavigate?.();
   }
 

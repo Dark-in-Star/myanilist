@@ -15,7 +15,7 @@ beforeEach(() => {
 });
 
 describe("SearchBar", () => {
-  it("navigates to the search page with the entered query", async () => {
+  it("navigates to the browse page with the entered query", async () => {
     const user = userEvent.setup();
     render(<SearchBar />);
 
@@ -23,7 +23,7 @@ describe("SearchBar", () => {
     await user.type(input, "one piece");
     await user.click(screen.getByRole("button", { name: "Search" }));
 
-    expect(push).toHaveBeenCalledWith("/search?q=one%20piece");
+    expect(push).toHaveBeenCalledWith("/browse?q=one%20piece");
   });
 
   it("does not navigate for an empty or whitespace-only query", async () => {
