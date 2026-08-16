@@ -88,7 +88,7 @@ flowchart LR
     Next <-- "X-MAL-CLIENT-ID (public)\nAuthorization: Bearer &lt;token&gt; (authenticated)" --> MAL
 ```
 
-- `/auth/login` starts an OAuth2 + PKCE flow against MAL directly; `/auth/callback` exchanges the code for tokens and stores them in an httpOnly session cookie; `/auth/logout` clears it.
+- `/auth/login` starts an OAuth2 + PKCE flow against MAL directly; `/auth/callback` exchanges the code for tokens and stores them in an httpOnly session cookie; `logoutAction` (a Server Action, not a GET route — GET routes get silently hit by Next.js's automatic `<Link>` prefetching) clears it.
 - `proxy.ts` (Next.js's Proxy/Middleware convention) proactively refreshes a near-expiry access token before it reaches a page render.
 - `src/lib/api.ts` and `src/lib/actions.ts` call `https://api.myanimelist.net/v2` directly — public endpoints (search, ranking, season, detail without a caller) authenticate with the app's own `X-MAL-CLIENT-ID`; authenticated endpoints (lists, profile, mutations) forward the current visitor's own token via `Authorization: Bearer <token>`.
 - Both files are `server-only` / `"use server"`, so none of this is reachable as a public HTTP endpoint — there's no `/api/anime`, `/api/users/@me`, etc. to curl. MAL calls only ever happen during SSR or inside a Server Action invoked by this app's own pages.

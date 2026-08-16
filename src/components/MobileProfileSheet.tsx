@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { LogIn, LogOut, User, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { logoutAction } from "@/lib/authActions";
 
 export function MobileProfileSheet({
   isAuthenticated,
@@ -108,14 +109,17 @@ export function MobileProfileSheet({
                 className="border-t border-border/60 px-4 pt-4"
                 style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 1rem)" }}
               >
-                <Link
-                  href="/auth/logout"
-                  onClick={() => setOpen(false)}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    void logoutAction();
+                  }}
                   className="flex w-full items-center justify-center gap-2 rounded-full border border-danger/30 bg-danger-soft px-4 py-3 text-sm font-semibold text-danger transition-colors hover:bg-danger/10"
                 >
                   <LogOut className="h-4 w-4" />
                   Log out
-                </Link>
+                </button>
               </div>
             </div>
           </div>,

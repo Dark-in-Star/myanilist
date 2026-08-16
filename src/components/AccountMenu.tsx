@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { logoutAction } from "@/lib/authActions";
 
 export function AccountMenu({
   isAuthenticated,
@@ -50,8 +51,14 @@ export function AccountMenu({
         <DropdownMenuItem asChild>
           <Link href="/profile">Profile</Link>
         </DropdownMenuItem>
-        <DropdownMenuItem variant="destructive" asChild>
-          <Link href="/auth/logout">Log out</Link>
+        <DropdownMenuItem
+          variant="destructive"
+          onSelect={(event) => {
+            event.preventDefault();
+            void logoutAction();
+          }}
+        >
+          Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

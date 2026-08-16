@@ -12,3 +12,4 @@ relevant file before touching an area it covers. See `AGENTS.md` for commands/co
 - [Mobile navigation architecture](mobile-nav-architecture.md) — bottom nav, profile sheet, and the shared NAV_LINKS split
 - [Testing setup](testing-setup.md) — Vitest + Playwright, the mock MAL server, and its parallel-worker caveat
 - [Known e2e gaps](known-e2e-gaps.md) — specs referencing UI that's since been replaced
+- [Link-prefetch GET mutation gotcha](link-prefetch-get-mutation-gotcha.md) — never wire a state-mutating route to `<Link href>`

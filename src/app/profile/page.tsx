@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import Link from "next/link";
 import { AuthRequiredError, getMyUserInfo } from "@/lib/api";
 import { LoginPrompt } from "@/components/LoginPrompt";
 import { formatCompactNumber, formatDate } from "@/lib/format";
+import { logoutAction } from "@/lib/authActions";
 
 export const metadata: Metadata = { title: "Profile" };
 
@@ -42,12 +42,14 @@ export default async function ProfilePage() {
             {user.joined_at ? `Joined ${formatDate(user.joined_at)}` : ""}
           </p>
         </div>
-        <Link
-          href="/auth/logout"
-          className="rounded-full border border-border/60 px-4 py-2 text-sm font-semibold text-muted transition-colors hover:border-danger hover:text-danger"
-        >
-          Log out
-        </Link>
+        <form action={logoutAction}>
+          <button
+            type="submit"
+            className="rounded-full border border-border/60 px-4 py-2 text-sm font-semibold text-muted transition-colors hover:border-danger hover:text-danger"
+          >
+            Log out
+          </button>
+        </form>
       </div>
 
       {stats && (
