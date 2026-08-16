@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NavBar } from "@/components/NavBar";
+import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
 import { getMyUserInfo } from "@/lib/api";
 import { getSession } from "@/lib/session";
@@ -70,6 +71,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <NavBar isAuthenticated={Boolean(session)} pictureUrl={pictureUrl} userName={userName} />
         <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 sm:px-6 sm:py-8">{children}</main>
         <Footer />
+        <div className="h-16 lg:hidden" aria-hidden="true" />
+        <BottomNav />
       </body>
     </html>
   );

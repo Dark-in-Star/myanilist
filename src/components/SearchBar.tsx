@@ -5,7 +5,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export function SearchBar({ onNavigate }: { onNavigate?: () => void }) {
+export function SearchBar({
+  onNavigate,
+  autoFocus,
+}: {
+  onNavigate?: () => void;
+  autoFocus?: boolean;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [value, setValue] = useState(searchParams.get("q") ?? "");
@@ -25,6 +31,7 @@ export function SearchBar({ onNavigate }: { onNavigate?: () => void }) {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Search anime or manga..."
+        autoFocus={autoFocus}
         className="h-9 rounded-full border-border bg-surface-muted pr-9 placeholder:text-muted focus-visible:border-accent"
       />
       <Button
