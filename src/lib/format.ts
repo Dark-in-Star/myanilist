@@ -61,6 +61,29 @@ export function formatMangaStatus(status?: MangaStatus): string {
   return status ? (MANGA_STATUS_LABELS[status] ?? status) : "Unknown";
 }
 
+export function formatCountdown(msRemaining: number): string {
+  if (msRemaining <= 0) return "Airing now";
+
+  const totalSeconds = Math.floor(msRemaining / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const units: [number, string][] = [
+    [days, "day"],
+    [hours, "hour"],
+    [minutes, "minute"],
+    [seconds, "second"],
+  ];
+  // Drop leading zero-value units (e.g. skip "days" once it hits zero) but always show minutes/seconds.
+  const start = units.findIndex(([value], i) => value > 0 || i >= units.length - 2);
+  return units
+    .slice(start)
+    .map(([value, unit]) => `${value} ${unit}${value === 1 ? "" : "s"}`)
+    .join(", ");
+}
+
 export function formatMediaType(type?: string): string {
   if (!type) return "Unknown";
   return type.toUpperCase().replace(/_/g, " ");

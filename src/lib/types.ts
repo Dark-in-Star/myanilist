@@ -29,6 +29,15 @@ export interface Broadcast {
   start_time?: string;
 }
 
+/** Next-episode airing schedule, sourced from AniList (MAL doesn't expose exact air dates). */
+export interface NextAiringEpisode {
+  episode: number;
+  /** ISO 8601 UTC timestamp. */
+  airingAt: string;
+  /** Seconds until airing, as of when this was fetched — use `airingAt` for a live countdown instead. */
+  timeUntilAiring: number;
+}
+
 export type AnimeStatus = "finished_airing" | "currently_airing" | "not_yet_aired";
 export type MangaStatus = "finished" | "currently_publishing" | "not_yet_published" | "on_hiatus";
 

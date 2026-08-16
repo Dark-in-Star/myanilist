@@ -3,11 +3,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ApiError, getAnime } from "@/lib/api";
+import { getNextAiringEpisode } from "@/lib/anilist";
 import { getSession } from "@/lib/session";
 import { ScoreBadge } from "@/components/ScoreBadge";
 import { InfoRow } from "@/components/InfoRow";
 import { GenreTags } from "@/components/GenreTags";
 import { AnimeListStatusEditor } from "@/components/AnimeListStatusEditor";
+import { NextEpisodeCountdown } from "@/components/NextEpisodeCountdown";
 import { MediaRow, MediaRowItem } from "@/components/MediaRow";
 import { MediaCard } from "@/components/MediaCard";
 import {
@@ -38,7 +40,11 @@ export async function generateMetadata({
 
 export default async function AnimeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [anime, session] = await Promise.all([loadAnime(Number(id)), getSession()]);
+  const [anime, session, nextEpisode] = await Promise.all([
+    loadAnime(Number(id)),
+    getSession(),
+    getNextAiringEpisode(Number(id)),
+  ]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -97,6 +103,10 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ id
             initial={anime.my_list_status}
             isAuthenticated={Boolean(session)}
           />
+
+          {anime.status === "currently_airing" && nextEpisode && (
+            <NextEpisodeCountdown schedule={nextEpisode} />
+          )}
 
           <dl className="divide-y divide-border rounded-xl border border-border bg-surface px-4">
             <InfoRow label="Type">{formatMediaType(anime.media_type)}</InfoRow>
