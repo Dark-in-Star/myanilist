@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { MangaListRow } from "./MangaListRow";
 import { EmptyState } from "./EmptyState";
 import { RevealList } from "./RevealList";
+import { ScrollableTabRow } from "./ScrollableTabRow";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MANGA_LIST_STATUS_LABELS } from "@/lib/format";
 import type { ListNode, MangaListStatus, MangaNode, MyMangaListStatusNode } from "@/lib/types";
@@ -78,10 +79,7 @@ export function MangaListBrowser({
 
   return (
     <div className="flex flex-col gap-5">
-      <div
-        className="no-scrollbar -mx-3 flex min-w-0 touch-pan-x gap-1 overflow-x-auto overflow-y-hidden border-b border-border px-3 sm:mx-0 sm:gap-2 sm:px-0"
-        style={{ WebkitOverflowScrolling: "touch" }}
-      >
+      <ScrollableTabRow>
         {STATUS_TABS.map((tab) => (
           <button
             key={tab.value}
@@ -100,7 +98,7 @@ export function MangaListBrowser({
             ) : null}
           </button>
         ))}
-      </div>
+      </ScrollableTabRow>
 
       <div className="flex flex-wrap items-center gap-2">
         <Select value={type} onValueChange={setType}>
