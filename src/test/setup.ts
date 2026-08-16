@@ -22,6 +22,20 @@ if (!window.localStorage) {
   Object.defineProperty(window, "localStorage", { value: memoryStorage, configurable: true });
 }
 
+// jsdom doesn't implement these, but Radix's Select uses them for pointer interactions.
+if (!Element.prototype.hasPointerCapture) {
+  Element.prototype.hasPointerCapture = () => false;
+}
+if (!Element.prototype.setPointerCapture) {
+  Element.prototype.setPointerCapture = () => {};
+}
+if (!Element.prototype.releasePointerCapture) {
+  Element.prototype.releasePointerCapture = () => {};
+}
+if (!Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {};
+}
+
 if (!window.matchMedia) {
   window.matchMedia = (query: string) =>
     ({
