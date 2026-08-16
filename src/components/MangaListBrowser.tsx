@@ -51,12 +51,13 @@ const COMPARATORS: Record<SortValue, (a: Entry, b: Entry) => number> = {
 };
 
 export function MangaListBrowser({
-  entries,
+  entries: initialEntries,
   initialStatus,
 }: {
   entries: Entry[];
   initialStatus: MangaListStatus | "all";
 }) {
+  const [entries, setEntries] = useState(initialEntries);
   const [status, setStatus] = useState<MangaListStatus | "all">(initialStatus);
   const [type, setType] = useState("all");
   const [sort, setSort] = useState<SortValue>("title");
@@ -77,9 +78,19 @@ export function MangaListBrowser({
       .sort(COMPARATORS[sort]);
   }, [entries, status, type, sort]);
 
+  function handleUpdated(mangaId: number, update: Partial<MyMangaListStatusNode>) {
+    setEntries((prev) =>
+      prev.map((e) => (e.node.id === mangaId ? { ...e, list_status: { ...e.list_status, ...update } } : e)),
+    );
+  }
+
+  function handleRemoved(mangaId: number) {
+    setEntries((prev) => prev.filter((e) => e.node.id !== mangaId));
+  }
+
   return (
     <div className="flex flex-col gap-5">
-      <ScrollableTabRow>
+      <ScrollableTabRow className="-mx-3 border-b border-border px-3 sm:mx-0 sm:px-0">
         {STATUS_TABS.map((tab) => (
           <button
             key={tab.value}
@@ -133,7 +144,13 @@ export function MangaListBrowser({
       ) : (
         <RevealList
           items={filtered.map(({ node, list_status }) => (
-            <MangaListRow key={node.id} node={node} listStatus={list_status} />
+            <MangaListRow
+              key={node.id}
+              node={node}
+              listStatus={list_status}
+              onUpdated={(update) => handleUpdated(node.id, update)}
+              onRemoved={() => handleRemoved(node.id)}
+            />
           ))}
         />
       )}

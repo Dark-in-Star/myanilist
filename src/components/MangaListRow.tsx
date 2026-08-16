@@ -3,116 +3,127 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { removeMangaAction, updateMangaStatusAction } from "@/lib/actions";
-import { MANGA_LIST_STATUS_LABELS } from "@/lib/format";
-import type { MangaListStatus, MangaNode, MyMangaListStatusNode } from "@/lib/types";
+import { Pencil, Plus } from "lucide-react";
+import { updateMangaStatusAction } from "@/lib/actions";
+import { formatMediaType } from "@/lib/format";
+import type { MangaNode, MyMangaListStatusNode } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MangaListEditModal } from "./MangaListEditModal";
 
-const STATUS_OPTIONS = Object.entries(MANGA_LIST_STATUS_LABELS) as [MangaListStatus, string][];
-
-export function MangaListRow({ node, listStatus }: { node: MangaNode; listStatus: MyMangaListStatusNode }) {
+export function MangaListRow({
+  node,
+  listStatus,
+  onUpdated,
+  onRemoved,
+}: {
+  node: MangaNode;
+  listStatus: MyMangaListStatusNode;
+  onUpdated: (update: Partial<MyMangaListStatusNode>) => void;
+  onRemoved: () => void;
+}) {
   const [isPending, startTransition] = useTransition();
-  const [status, setStatus] = useState<MangaListStatus>(listStatus.status ?? "reading");
-  const [score, setScore] = useState(listStatus.score ?? 0);
   const [chapters, setChapters] = useState(listStatus.num_chapters_read ?? 0);
-  const [hidden, setHidden] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editSession, setEditSession] = useState(0);
 
-  function save(next: { status?: MangaListStatus; score?: number; num_chapters_read?: number }) {
-    startTransition(() => updateMangaStatusAction({ mangaId: node.id, ...next }));
+  const total = node.num_chapters || undefined;
+  const atMax = total !== undefined && chapters >= total;
+
+  function handleIncrement() {
+    if (atMax) return;
+    const next = chapters + 1;
+    setChapters(next);
+
+    const update: Partial<MyMangaListStatusNode> = { num_chapters_read: next };
+    if (!listStatus.status || listStatus.status === "plan_to_read" || listStatus.status === "on_hold") {
+      update.status = "reading";
+    }
+    if (total !== undefined && next >= total) {
+      update.status = "completed";
+    }
+
+    onUpdated(update);
+    startTransition(() =>
+      updateMangaStatusAction({ mangaId: node.id, num_chapters_read: next, status: update.status }),
+    );
   }
 
-  function handleRemove() {
-    startTransition(async () => {
-      await removeMangaAction(node.id);
-      setHidden(true);
-    });
-  }
-
-  if (hidden) return null;
+  const pct = total ? Math.min(100, (chapters / total) * 100) : 0;
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3 sm:gap-4">
-      <Link href={`/manga/${node.id}`} className="relative h-20 w-14 shrink-0 overflow-hidden rounded-lg bg-surface-muted sm:h-24 sm:w-16">
-        {node.main_picture && (
-          <Image src={node.main_picture.medium} alt={node.title} fill sizes="64px" className="object-cover" />
-        )}
-      </Link>
-
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <Link href={`/manga/${node.id}`} className="line-clamp-2 text-sm font-semibold text-foreground hover:text-accent sm:text-base">
-          {node.title}
+    <>
+      <div
+        data-testid={`manga-list-row-${node.id}`}
+        className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3 sm:gap-4"
+      >
+        <Link
+          href={`/manga/${node.id}`}
+          className="relative h-20 w-14 shrink-0 overflow-hidden rounded-lg bg-surface-muted sm:h-24 sm:w-16"
+        >
+          {node.main_picture && (
+            <Image src={node.main_picture.medium} alt={node.title} fill sizes="64px" className="object-cover" />
+          )}
         </Link>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Select
-            value={status}
-            onValueChange={(next: MangaListStatus) => {
-              setStatus(next);
-              save({ status: next });
-            }}
-            disabled={isPending}
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <Link
+            href={`/manga/${node.id}`}
+            className="line-clamp-2 text-sm font-semibold text-foreground hover:text-accent sm:text-base"
           >
-            <SelectTrigger size="sm" className="bg-surface-muted text-xs font-medium text-foreground sm:text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {node.title}
+          </Link>
+          <p className="text-xs text-muted sm:text-sm">{formatMediaType(node.media_type)}</p>
 
-          <Select
-            value={String(score)}
-            onValueChange={(next) => {
-              const value = Number(next);
-              setScore(value);
-              save({ score: value });
-            }}
-            disabled={isPending}
-          >
-            <SelectTrigger size="sm" aria-label="Score" className="bg-surface-muted text-xs font-medium text-foreground sm:text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: 11 }, (_, i) => i).map((n) => (
-                <SelectItem key={n} value={String(n)}>
-                  {n === 0 ? "Score" : `★ ${n}`}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <div className="flex items-center gap-1 text-xs text-muted sm:text-sm">
-            <Input
-              type="number"
-              min={0}
-              max={node.num_chapters || undefined}
-              value={chapters}
-              onChange={(e) => setChapters(Number(e.target.value))}
-              onBlur={() => save({ num_chapters_read: chapters })}
-              disabled={isPending}
-              aria-label="Chapters read"
-              className="w-14 bg-surface-muted text-foreground"
-            />
-            <span>/ {node.num_chapters || "?"} ch</span>
+          <div className="flex items-center gap-2">
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-muted">
+              <div className="h-full rounded-full bg-accent transition-all duration-300" style={{ width: `${pct}%` }} />
+            </div>
+            <span className="shrink-0 text-xs font-medium text-muted sm:text-sm">
+              {chapters} / {total ?? "?"} ch
+            </span>
           </div>
+        </div>
 
+        <div className="flex shrink-0 flex-col gap-2">
           <Button
             type="button"
-            variant="link"
-            onClick={handleRemove}
-            disabled={isPending}
-            className="ml-auto h-auto p-0 text-xs font-medium text-danger"
+            variant="outline"
+            size="icon-sm"
+            aria-label="Edit"
+            onClick={() => {
+              setEditSession((s) => s + 1);
+              setEditOpen(true);
+            }}
+            className="border-border/60"
           >
-            Remove
+            <Pencil className="size-3.5" />
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon-sm"
+            aria-label="Increase chapters read"
+            onClick={handleIncrement}
+            disabled={isPending || atMax}
+            className="border-border/60"
+          >
+            <Plus className="size-3.5" />
           </Button>
         </div>
       </div>
-    </div>
+
+      <MangaListEditModal
+        key={editSession}
+        node={node}
+        listStatus={{ ...listStatus, num_chapters_read: chapters }}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        onSaved={(update) => {
+          if (update.num_chapters_read !== undefined) setChapters(update.num_chapters_read);
+          onUpdated(update);
+        }}
+        onRemoved={onRemoved}
+      />
+    </>
   );
 }

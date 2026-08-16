@@ -36,6 +36,34 @@ if (!Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = () => {};
 }
 
+// jsdom doesn't implement these, but embla-carousel (used for horizontally
+// scrollable rows) needs them to initialize.
+if (!("IntersectionObserver" in window)) {
+  class MockIntersectionObserver implements IntersectionObserver {
+    readonly root = null;
+    readonly rootMargin = "";
+    readonly thresholds: ReadonlyArray<number> = [];
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords(): IntersectionObserverEntry[] {
+      return [];
+    }
+  }
+  Object.defineProperty(window, "IntersectionObserver", { value: MockIntersectionObserver, configurable: true });
+  Object.defineProperty(globalThis, "IntersectionObserver", { value: MockIntersectionObserver, configurable: true });
+}
+
+if (!("ResizeObserver" in window)) {
+  class MockResizeObserver implements ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  Object.defineProperty(window, "ResizeObserver", { value: MockResizeObserver, configurable: true });
+  Object.defineProperty(globalThis, "ResizeObserver", { value: MockResizeObserver, configurable: true });
+}
+
 if (!window.matchMedia) {
   window.matchMedia = (query: string) =>
     ({

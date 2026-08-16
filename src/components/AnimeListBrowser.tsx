@@ -50,7 +50,14 @@ const COMPARATORS: Record<SortValue, (a: Entry, b: Entry) => number> = {
   updated: (a, b) => (b.list_status.updated_at ?? "").localeCompare(a.list_status.updated_at ?? ""),
 };
 
-export function AnimeListBrowser({ entries, initialStatus }: { entries: Entry[]; initialStatus: ListStatus | "all" }) {
+export function AnimeListBrowser({
+  entries: initialEntries,
+  initialStatus,
+}: {
+  entries: Entry[];
+  initialStatus: ListStatus | "all";
+}) {
+  const [entries, setEntries] = useState(initialEntries);
   const [status, setStatus] = useState<ListStatus | "all">(initialStatus);
   const [type, setType] = useState("all");
   const [sort, setSort] = useState<SortValue>("title");
@@ -71,9 +78,19 @@ export function AnimeListBrowser({ entries, initialStatus }: { entries: Entry[];
       .sort(COMPARATORS[sort]);
   }, [entries, status, type, sort]);
 
+  function handleUpdated(animeId: number, update: Partial<MyListStatus>) {
+    setEntries((prev) =>
+      prev.map((e) => (e.node.id === animeId ? { ...e, list_status: { ...e.list_status, ...update } } : e)),
+    );
+  }
+
+  function handleRemoved(animeId: number) {
+    setEntries((prev) => prev.filter((e) => e.node.id !== animeId));
+  }
+
   return (
     <div className="flex flex-col gap-5">
-      <ScrollableTabRow>
+      <ScrollableTabRow className="-mx-3 border-b border-border px-3 sm:mx-0 sm:px-0">
         {STATUS_TABS.map((tab) => (
           <button
             key={tab.value}
@@ -127,7 +144,13 @@ export function AnimeListBrowser({ entries, initialStatus }: { entries: Entry[];
       ) : (
         <RevealList
           items={filtered.map(({ node, list_status }) => (
-            <AnimeListRow key={node.id} node={node} listStatus={list_status} />
+            <AnimeListRow
+              key={node.id}
+              node={node}
+              listStatus={list_status}
+              onUpdated={(update) => handleUpdated(node.id, update)}
+              onRemoved={() => handleRemoved(node.id)}
+            />
           ))}
         />
       )}
