@@ -21,7 +21,7 @@ export function NavBar({
   userName?: string;
 }) {
   const pathname = usePathname();
-  const isHome = pathname === "/";
+  const isHome = pathname === "/" || pathname.startsWith("/mylist");
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
