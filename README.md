@@ -11,8 +11,9 @@ Browse rankings, search, and manage your list — no separate backend, no expose
 [![Vitest](https://img.shields.io/badge/Vitest-unit%20tests-6E9F18?logo=vitest&logoColor=white)](https://vitest.dev)
 [![Playwright](https://img.shields.io/badge/Playwright-e2e-2EAD33?logo=playwright&logoColor=white)](https://playwright.dev)
 [![MyAnimeList API](https://img.shields.io/badge/MyAnimeList-API%20v2-2E51A2?logo=myanimelist&logoColor=white)](https://myanimelist.net/apiconfig/references/api/v2)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-myanilist.vercel.app-000000?logo=vercel&logoColor=white)](https://myanilist.vercel.app/)
 
-[Screenshots](#screenshots) · [Features](#features) · [Tech Stack](#tech-stack) · [Architecture](#architecture) · [Getting Started](#getting-started)
+[Live Demo](https://myanilist.vercel.app/) · [Screenshots](#screenshots) · [Features](#features) · [Tech Stack](#tech-stack) · [Architecture](#architecture) · [Getting Started](#getting-started)
 
 </div>
 
