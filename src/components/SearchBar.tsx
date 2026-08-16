@@ -4,13 +4,16 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 export function SearchBar({
   onNavigate,
   autoFocus,
+  className,
 }: {
   onNavigate?: () => void;
   autoFocus?: boolean;
+  className?: string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -32,7 +35,10 @@ export function SearchBar({
         onChange={(e) => setValue(e.target.value)}
         placeholder="Search anime or manga..."
         autoFocus={autoFocus}
-        className="h-9 rounded-full border-border bg-surface-muted pr-9 placeholder:text-muted focus-visible:border-accent"
+        className={cn(
+          "h-9 rounded-full border-border bg-surface-muted pr-9 placeholder:text-muted focus-visible:border-accent",
+          className,
+        )}
       />
       <Button
         type="submit"
