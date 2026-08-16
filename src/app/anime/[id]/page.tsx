@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Layers,
   ListVideo,
+  Play,
   ShieldCheck,
   Star,
   Tv,
@@ -79,7 +80,14 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ id
         className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-accent hover:text-accent"
       >
         <span className="flex items-center gap-2">
-          <Tv className="size-4" /> Where to watch
+          <Image
+            src="https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png"
+            alt=""
+            width={16}
+            height={16}
+            className="rounded-sm"
+          />
+          Open in Myanimelist
         </span>
         <ExternalLink className="size-3.5 text-muted" />
       </a>
@@ -216,6 +224,13 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ id
             </p>
 
             <GenreTags genres={anime.genres} />
+
+            <Link
+              href={`/anime/${anime.id}/watch`}
+              className="flex w-fit items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold transition-colors text-white hover:bg-primary/80"
+            >
+              <Play className="size-4" /> Watch Now
+            </Link>
 
             {anime.synopsis && (
               <p className="max-w-3xl whitespace-pre-line text-sm leading-relaxed text-foreground">

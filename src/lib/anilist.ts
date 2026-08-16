@@ -65,6 +65,7 @@ const ANIME_EXTRAS_QUERY = `
   query ($malId: Int) {
     Media(idMal: $malId, type: ANIME) {
       trailer { id site }
+      externalLinks { url site type icon color language }
       characters(perPage: 12) {
         edges {
           role
@@ -88,10 +89,20 @@ interface AniListPerson {
   image?: { large?: string; medium?: string } | null;
 }
 
+interface AniListExternalLink {
+  url: string;
+  site: string;
+  type: string;
+  icon?: string | null;
+  color?: string | null;
+  language?: string | null;
+}
+
 interface AniListExtrasResponse {
   data?: {
     Media?: {
       trailer?: { id: string; site: string } | null;
+      externalLinks?: AniListExternalLink[] | null;
       characters?: {
         edges: { role: string; node: AniListPerson; voiceActors: AniListPerson[] }[];
       } | null;
@@ -105,11 +116,6 @@ function personImage(person: AniListPerson): string | undefined {
   return person.image?.large ?? person.image?.medium ?? undefined;
 }
 
-/**
- * Trailer/characters/staff for a MAL anime id, via AniList's GraphQL API — none of
- * this is available from MAL's own API. Fails soft (null) like getNextAiringEpisode:
- * this is a supplementary enhancement, never worth failing the details page for.
- */
 export async function getAnimeExtras(malId: number, revalidate = 3600): Promise<AnimeExtras | null> {
   let response: Response;
   try {
@@ -131,6 +137,15 @@ export async function getAnimeExtras(malId: number, revalidate = 3600): Promise<
 
   return {
     trailer: media.trailer?.site === "youtube" && media.trailer.id ? { id: media.trailer.id } : null,
+    streamingLinks: (media.externalLinks ?? [])
+      .filter((link) => link.type === "STREAMING")
+      .map((link) => ({
+        url: link.url,
+        site: link.site,
+        icon: link.icon ?? undefined,
+        color: link.color ?? undefined,
+        language: link.language ?? undefined,
+      })),
     characters: (media.characters?.edges ?? []).map((edge) => ({
       id: edge.node.id,
       name: edge.node.name.full,

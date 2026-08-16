@@ -61,9 +61,19 @@ export interface AnimeStaffMember extends CastMember {
   role: string;
 }
 
-/** Trailer/characters/staff, sourced from AniList — MAL's API doesn't expose any of this. */
+/** An officially licensed streaming platform for a title, sourced from AniList's externalLinks. */
+export interface StreamingLink {
+  url: string;
+  site: string;
+  icon?: string;
+  color?: string;
+  language?: string;
+}
+
+/** Trailer/characters/staff/streaming links, sourced from AniList — MAL's API doesn't expose any of this. */
 export interface AnimeExtras {
   trailer: AnimeTrailer | null;
+  streamingLinks: StreamingLink[];
   characters: AnimeCharacter[];
   staff: AnimeStaffMember[];
 }

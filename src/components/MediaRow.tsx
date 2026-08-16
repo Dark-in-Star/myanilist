@@ -28,12 +28,13 @@ function useCanScroll(emblaApi: EmblaCarouselType | undefined) {
   return state;
 }
 
-function ArrowButton({ direction, onClick, disabled }: { direction: "prev" | "next"; onClick: () => void; disabled: boolean }) {
+function ArrowButton({ direction, onClick, disabled = true }: { direction: "prev" | "next"; onClick: () => void; disabled: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
+      suppressHydrationWarning
       aria-label={direction === "prev" ? "Scroll left" : "Scroll right"}
       className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border/60 bg-surface text-foreground shadow-sm transition-all hover:border-accent hover:text-accent disabled:pointer-events-none disabled:opacity-30"
     >

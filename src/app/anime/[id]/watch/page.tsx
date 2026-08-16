@@ -1,0 +1,101 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft, ExternalLink, Tv } from "lucide-react";
+import { ApiError, getAnime } from "@/lib/api";
+import { getAnimeExtras } from "@/lib/anilist";
+
+async function loadAnime(id: number) {
+  try {
+    return await getAnime(id);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) notFound();
+    throw error;
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const anime = await loadAnime(Number(id));
+  return { title: `Watch ${anime.title}` };
+}
+
+export default async function WatchAnimePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const [anime, extras] = await Promise.all([loadAnime(Number(id)), getAnimeExtras(Number(id))]);
+  const streamingLinks = extras?.streamingLinks ?? [];
+
+  return (
+    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+      <Link
+        href={`/anime/${anime.id}`}
+        className="flex w-fit items-center gap-1.5 text-sm font-medium text-muted transition-colors hover:text-foreground"
+      >
+        <ArrowLeft className="size-3.5" /> Back to details
+      </Link>
+
+      <div className="flex items-center gap-4 rounded-xl border border-border bg-surface p-4">
+        <div className="relative aspect-2/3 w-16 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-muted">
+          {anime.main_picture && (
+            <Image
+              src={anime.main_picture.large ?? anime.main_picture.medium}
+              alt={anime.title}
+              fill
+              sizes="64px"
+              className="object-cover"
+            />
+          )}
+        </div>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-lg font-bold text-foreground">{anime.title}</h1>
+          <p className="text-sm text-muted">Choose an officially licensed platform to watch on</p>
+        </div>
+      </div>
+
+      {streamingLinks.length > 0 ? (
+        <div className="flex flex-col divide-y divide-border rounded-xl border border-border bg-surface">
+          {streamingLinks.map((link) => (
+            <a
+              key={link.url}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between gap-3 px-4 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-surface-muted"
+            >
+              <span className="flex items-center gap-3">
+                {link.icon ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={link.icon} alt="" className="size-5 shrink-0 rounded" />
+                ) : (
+                  <Tv className="size-5 shrink-0 text-muted" />
+                )}
+                {link.site}
+                {link.language && link.language !== "Japanese" && (
+                  <span className="text-xs font-normal text-muted">{link.language}</span>
+                )}
+              </span>
+              <ExternalLink className="size-3.5 shrink-0 text-muted" />
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-surface px-4 py-10 text-center">
+          <p className="text-sm text-muted">No officially licensed streaming platform is listed for this title yet.</p>
+          <a
+            href={`https://myanimelist.net/anime/${anime.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
+          >
+            Check MyAnimeList <ExternalLink className="size-3.5" />
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}
