@@ -145,7 +145,7 @@ describe("AnimeListRow", () => {
     expect(screen.getByText("My 9")).toBeInTheDocument();
   });
 
-  it("omits the English title when it duplicates the main title, and my score when unrated", () => {
+  it("shows the English title even when it matches the main title, but omits my score when unrated", () => {
     render(
       <AnimeListRow
         node={{ ...NODE, alternative_titles: { en: "86" } }}
@@ -155,7 +155,7 @@ describe("AnimeListRow", () => {
       />,
     );
 
-    expect(screen.getAllByText("86")).toHaveLength(1);
+    expect(screen.getAllByText("86")).toHaveLength(2);
     expect(screen.queryByText(/^My /)).not.toBeInTheDocument();
   });
 });

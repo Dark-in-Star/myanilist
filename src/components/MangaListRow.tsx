@@ -53,8 +53,7 @@ export function MangaListRow({
 
   const pct = total ? Math.min(100, (chapters / total) * 100) : 0;
 
-  const englishTitle =
-    node.alternative_titles?.en && node.alternative_titles.en !== node.title ? node.alternative_titles.en : undefined;
+  const englishTitle = node.alternative_titles?.en;
   const isPublishing = node.status === "currently_publishing";
   const genres = node.genres ?? [];
   const visibleGenres = genres.slice(0, MAX_VISIBLE_GENRES);
