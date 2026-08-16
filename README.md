@@ -35,6 +35,10 @@ Browse rankings, search, and manage your list — no separate backend, no expose
 <td align="center" width="33%"><img src=".github/assets/screenshots/mobile-archive.jpg" alt="Seasonal archive, mobile dark mode" /><br /><sub>Seasonal Archive</sub></td>
 <td align="center" width="33%"><img src=".github/assets/screenshots/mobile-manga-browse.jpg" alt="Manga rankings, mobile dark mode" /><br /><sub>Manga Rankings</sub></td>
 </tr>
+<tr>
+<td align="center" width="33%"><img src=".github/assets/screenshots/mobile-mylist.jpg" alt="My Anime List, mobile dark mode" /><br /><sub>My List</sub></td>
+<td align="center" width="33%"><img src=".github/assets/screenshots/mobile-mylist-filter.jpg" alt="My List filter modal, mobile dark mode" /><br /><sub>My List — Filters</sub></td>
+</tr>
 </table>
 
 <details>
