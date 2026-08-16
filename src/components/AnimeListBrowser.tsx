@@ -72,7 +72,10 @@ export function AnimeListBrowser({ entries, initialStatus }: { entries: Entry[];
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="no-scrollbar -mx-3 flex min-w-0 gap-1 overflow-x-auto border-b border-border px-3 sm:mx-0 sm:gap-2 sm:px-0">
+      <div
+        className="no-scrollbar -mx-3 flex min-w-0 touch-pan-x gap-1 overflow-x-auto overflow-y-hidden border-b border-border px-3 sm:mx-0 sm:gap-2 sm:px-0"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
         {STATUS_TABS.map((tab) => (
           <button
             key={tab.value}
