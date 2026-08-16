@@ -99,23 +99,32 @@ export default function Home() {
       </section>
 
       <Suspense fallback={<RowSkeleton />}>
-        <AnimeRankingRow title="Currently Airing" rankingType="airing" viewAllHref="/anime?type=airing" priority />
+        <AnimeRankingRow
+          title="Currently Airing"
+          rankingType="airing"
+          viewAllHref="/browse?media=anime&type=airing"
+          priority
+        />
       </Suspense>
 
       <Suspense fallback={<RowSkeleton />}>
-        <AnimeRankingRow title="Top Anime" rankingType="all" viewAllHref="/anime?type=all" />
+        <AnimeRankingRow title="Top Anime" rankingType="all" viewAllHref="/browse?media=anime&type=all" />
       </Suspense>
 
       <Suspense fallback={<RowSkeleton />}>
-        <AnimeRankingRow title="Upcoming Anime" rankingType="upcoming" viewAllHref="/anime?type=upcoming" />
+        <AnimeRankingRow title="Upcoming Anime" rankingType="upcoming" viewAllHref="/browse?media=anime&type=upcoming" />
       </Suspense>
 
       <Suspense fallback={<RowSkeleton />}>
-        <MangaRankingRow title="Top Manga" rankingType="all" viewAllHref="/manga?type=all" />
+        <MangaRankingRow title="Top Manga" rankingType="all" viewAllHref="/browse?media=manga&type=all" />
       </Suspense>
 
       <Suspense fallback={<RowSkeleton />}>
-        <MangaRankingRow title="Popular Manga" rankingType="bypopularity" viewAllHref="/manga?type=bypopularity" />
+        <MangaRankingRow
+          title="Popular Manga"
+          rankingType="bypopularity"
+          viewAllHref="/browse?media=manga&type=bypopularity"
+        />
       </Suspense>
     </div>
   );

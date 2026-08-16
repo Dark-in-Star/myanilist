@@ -141,7 +141,7 @@ export default async function MangaDetailPage({ params }: { params: Promise<{ id
         </div>
       </div>
 
-      <Link href="/manga" className="text-sm font-medium text-accent hover:underline">
+      <Link href="/browse?media=manga" className="text-sm font-medium text-accent hover:underline">
         ← Back to rankings
       </Link>
     </div>

@@ -155,7 +155,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ id
         </div>
       </div>
 
-      <Link href="/anime" className="text-sm font-medium text-accent hover:underline">
+      <Link href="/browse?media=anime" className="text-sm font-medium text-accent hover:underline">
         ← Back to rankings
       </Link>
     </div>

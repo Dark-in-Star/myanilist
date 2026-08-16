@@ -20,7 +20,7 @@ test.describe("Home page", () => {
       .getByRole("link", { name: /view all/i })
       .click();
 
-    await expect(page).toHaveURL(/\/anime\?type=all/);
+    await expect(page).toHaveURL(/\/browse\?media=anime&type=all/);
     await expect(page.getByRole("heading", { name: "Anime Rankings" })).toBeVisible();
   });
 

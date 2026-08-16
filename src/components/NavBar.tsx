@@ -12,15 +12,18 @@ import { Button } from "@/components/ui/button";
 
 const LINKS = [
   { href: "/", label: "Home" },
-  { href: "/anime", label: "Anime" },
-  { href: "/manga", label: "Manga" },
+  { href: "/browse", label: "Browse" },
   { href: "/archive", label: "Archive" },
   { href: "/mylist/anime", label: "My Anime List" },
   { href: "/mylist/manga", label: "My Manga List" },
 ];
 
 function isActive(pathname: string, href: string) {
-  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+  if (href === "/") return pathname === "/";
+  if (href === "/browse") {
+    return pathname.startsWith("/browse") || pathname.startsWith("/anime/") || pathname.startsWith("/manga/");
+  }
+  return pathname.startsWith(href);
 }
 
 export function NavBar({

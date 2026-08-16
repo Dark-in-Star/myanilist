@@ -5,8 +5,7 @@ test.describe("Responsive navigation", () => {
     test.skip(isMobile, "desktop-only assertions");
 
     await page.goto("/");
-    await expect(page.getByRole("link", { name: "Anime", exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Manga", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Browse", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Toggle menu" })).toBeHidden();
   });
 
@@ -16,21 +15,20 @@ test.describe("Responsive navigation", () => {
     await page.goto("/");
     const toggle = page.getByRole("button", { name: "Toggle menu" });
     await expect(toggle).toBeVisible();
-    await expect(page.getByRole("link", { name: "Anime", exact: true })).toBeHidden();
+    await expect(page.getByRole("link", { name: "Browse", exact: true })).toBeHidden();
 
     await toggle.click();
-    await expect(page.getByRole("link", { name: "Anime", exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Manga", exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Browse", exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: "My Anime List" })).toBeVisible();
 
     await toggle.click();
-    await expect(page.getByRole("link", { name: "Anime", exact: true })).toBeHidden();
+    await expect(page.getByRole("link", { name: "Browse", exact: true })).toBeHidden();
   });
 
   test("the media grid uses more columns on wider viewports", async ({ page, isMobile }) => {
     test.skip(isMobile, "resizes the viewport directly instead");
 
-    await page.goto("/anime?type=all");
+    await page.goto("/browse?media=anime&type=all");
     const grid = page.locator('a[href^="/anime/"]').first().locator("xpath=..");
 
     const countColumns = () =>
