@@ -1,4 +1,4 @@
-import type { Genre } from "@/lib/types";
+import type { AlternativeTitles, Genre } from "@/lib/types";
 
 export interface ListFilters {
   genres: number[];
@@ -62,4 +62,18 @@ export function matchesListFilters(
   if (filters.dateTo && (!node.start_date || node.start_date > filters.dateTo)) return false;
 
   return true;
+}
+
+export function matchesQuery(node: { title: string; alternative_titles?: AlternativeTitles }, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+
+  if (node.title.toLowerCase().includes(q)) return true;
+
+  const alt = node.alternative_titles;
+  if (alt?.en?.toLowerCase().includes(q)) return true;
+  if (alt?.ja?.toLowerCase().includes(q)) return true;
+  if (alt?.synonyms?.some((synonym) => synonym.toLowerCase().includes(q))) return true;
+
+  return false;
 }

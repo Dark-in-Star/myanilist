@@ -5,12 +5,14 @@ import clsx from "clsx";
 import { MangaListRow } from "./MangaListRow";
 import { EmptyState } from "./EmptyState";
 import { ListFilterButton } from "./ListFilterButton";
+import { ListSearchBar } from "./ListSearchBar";
+import { MediaTypeToggle } from "./MediaTypeToggle";
 import { RevealList } from "./RevealList";
 import { ScrollableTabRow } from "./ScrollableTabRow";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MANGA_LIST_STATUS_LABELS } from "@/lib/format";
-import { DEFAULT_LIST_FILTERS, matchesListFilters, type ListFilters } from "@/lib/list-filters";
+import { DEFAULT_LIST_FILTERS, matchesListFilters, matchesQuery, type ListFilters } from "@/lib/list-filters";
 import type { ListNode, MangaListStatus, MangaNode, MyMangaListStatusNode } from "@/lib/types";
 
 type Entry = ListNode<MangaNode, MyMangaListStatusNode>;
@@ -65,6 +67,7 @@ export function MangaListBrowser({
   const [type, setType] = useState("all");
   const [sort, setSort] = useState<SortValue>("title");
   const [filters, setFilters] = useState<ListFilters>(DEFAULT_LIST_FILTERS);
+  const [query, setQuery] = useState("");
 
   const counts = useMemo(() => {
     return entries.reduce<Record<string, number>>((acc, e) => {
@@ -83,9 +86,10 @@ export function MangaListBrowser({
   const filtered = useMemo(() => {
     return statusTypeFiltered
       .filter((e) => matchesListFilters(e.node, filters))
+      .filter((e) => matchesQuery(e.node, query))
       .slice()
       .sort(COMPARATORS[sort]);
-  }, [statusTypeFiltered, filters, sort]);
+  }, [statusTypeFiltered, filters, query, sort]);
 
   function handleUpdated(mangaId: number, update: Partial<MyMangaListStatusNode>) {
     setEntries((prev) =>
@@ -99,6 +103,14 @@ export function MangaListBrowser({
 
   return (
     <div className="flex flex-col gap-5">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-bold sm:text-2xl">My Manga List</h1>
+          <MediaTypeToggle active="manga" />
+        </div>
+        <ListSearchBar value={query} onChange={setQuery} placeholder="Search your manga list..." />
+      </div>
+
       <ScrollableTabRow className="-mx-3 border-b border-border px-3 sm:mx-0 sm:px-0">
         {STATUS_TABS.map((tab) => (
           <button
@@ -156,9 +168,17 @@ export function MangaListBrowser({
 
       {filtered.length === 0 ? (
         statusTypeFiltered.length > 0 ? (
-          <EmptyState title="No matches" description="Try adjusting or clearing your filters.">
-            <Button type="button" variant="outline" size="sm" onClick={() => setFilters(DEFAULT_LIST_FILTERS)}>
-              Clear filters
+          <EmptyState title="No matches" description="Try adjusting or clearing your search and filters.">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setFilters(DEFAULT_LIST_FILTERS);
+                setQuery("");
+              }}
+            >
+              Clear search &amp; filters
             </Button>
           </EmptyState>
         ) : (
