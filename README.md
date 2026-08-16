@@ -1,10 +1,6 @@
 <div align="center">
 
-<img src="public/logo.webp" alt="MyAniList logo" width="88" height="88" />
-
-# MyAniList
-
-**A fast, responsive anime & manga tracker built on the official MyAnimeList API.**
+<img src=".github/assets/screenshots/banner.jpg" alt="MyAniList — Anime & Manga Tracker for MyAnimeList" width="100%" />
 
 Browse rankings, search, and manage your list — no separate backend, no exposed API, just Next.js talking to MAL directly from the server.
 
