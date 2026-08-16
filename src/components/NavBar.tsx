@@ -14,8 +14,7 @@ const LINKS = [
   { href: "/", label: "Home" },
   { href: "/browse", label: "Browse" },
   { href: "/archive", label: "Archive" },
-  { href: "/mylist/anime", label: "My Anime List" },
-  { href: "/mylist/manga", label: "My Manga List" },
+  { href: "/mylist", label: "My List" },
 ];
 
 function isActive(pathname: string, href: string) {

@@ -45,7 +45,7 @@ export async function updateAnimeStatusAction(input: UpdateAnimeStatusInput) {
     throw new Error(`Failed to update anime list status: ${response.status}`);
   }
 
-  revalidatePath("/mylist/anime");
+  revalidatePath("/mylist");
 }
 
 export async function removeAnimeAction(animeId: number) {
@@ -59,7 +59,7 @@ export async function removeAnimeAction(animeId: number) {
     throw new Error(`Failed to remove anime from list: ${response.status}`);
   }
 
-  revalidatePath("/mylist/anime");
+  revalidatePath("/mylist");
   revalidatePath(`/anime/${animeId}`);
 }
 
@@ -87,7 +87,7 @@ export async function updateMangaStatusAction(input: UpdateMangaStatusInput) {
     throw new Error(`Failed to update manga list status: ${response.status}`);
   }
 
-  revalidatePath("/mylist/manga");
+  revalidatePath("/mylist");
   revalidatePath(`/manga/${mangaId}`);
 }
 
@@ -102,6 +102,6 @@ export async function removeMangaAction(mangaId: number) {
     throw new Error(`Failed to remove manga from list: ${response.status}`);
   }
 
-  revalidatePath("/mylist/manga");
+  revalidatePath("/mylist");
   revalidatePath(`/manga/${mangaId}`);
 }

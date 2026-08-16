@@ -19,7 +19,7 @@ test.describe("Responsive navigation", () => {
 
     await toggle.click();
     await expect(page.getByRole("link", { name: "Browse", exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: "My Anime List" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "My List" })).toBeVisible();
 
     await toggle.click();
     await expect(page.getByRole("link", { name: "Browse", exact: true })).toBeHidden();
