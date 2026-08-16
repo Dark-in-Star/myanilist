@@ -98,9 +98,9 @@ export const MANGA_LIST_FIELDS =
   "id,title,main_picture,mean,media_type,status,num_volumes,num_chapters,genres,rank,popularity";
 
 // The my-list cards also show an English title alongside the main (Japanese) one,
-// which the ranking/search field sets above don't request.
-export const MY_ANIME_LIST_FIELDS = `${ANIME_LIST_FIELDS},alternative_titles`;
-export const MY_MANGA_LIST_FIELDS = `${MANGA_LIST_FIELDS},alternative_titles`;
+// and the list filter/sort need start_date — none of which the ranking/search field sets above request.
+export const MY_ANIME_LIST_FIELDS = `${ANIME_LIST_FIELDS},alternative_titles,start_date`;
+export const MY_MANGA_LIST_FIELDS = `${MANGA_LIST_FIELDS},alternative_titles,start_date`;
 
 export const MANGA_DETAIL_FIELDS =
   "id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity," +

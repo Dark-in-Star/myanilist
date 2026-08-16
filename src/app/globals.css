@@ -140,10 +140,6 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-* {
-  border-color: var(--border);
-}
-
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -179,6 +175,48 @@ body {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Two overlaid range inputs form a dual-thumb slider; only the thumbs (not the
+   invisible track) are interactive so each handle can be grabbed independently. */
+.range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  pointer-events: none;
+}
+
+.range-slider::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  background: transparent;
+}
+
+.range-slider::-moz-range-track {
+  background: transparent;
+}
+
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
+  cursor: pointer;
+}
+
+.range-slider::-moz-range-thumb {
+  pointer-events: auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
+  cursor: pointer;
 }
 
 .shadow-glow {

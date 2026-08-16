@@ -33,6 +33,14 @@ export function formatDate(value?: string): string {
   });
 }
 
+/** Inverse of the local-timezone parsing in formatDate: a Date back to a "YYYY-MM-DD" key. */
+export function toDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export function formatDateRange(start?: string, end?: string): string {
   if (!start && !end) return "Unknown";
   if (start && !end) return `${formatDate(start)} - ?`;

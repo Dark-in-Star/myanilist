@@ -4,10 +4,13 @@ import { useMemo, useState } from "react";
 import clsx from "clsx";
 import { AnimeListRow } from "./AnimeListRow";
 import { EmptyState } from "./EmptyState";
+import { ListFilterButton } from "./ListFilterButton";
 import { RevealList } from "./RevealList";
 import { ScrollableTabRow } from "./ScrollableTabRow";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ANIME_LIST_STATUS_LABELS } from "@/lib/format";
+import { DEFAULT_LIST_FILTERS, matchesListFilters, type ListFilters } from "@/lib/list-filters";
 import type { AnimeNode, ListNode, ListStatus, MyListStatus } from "@/lib/types";
 
 type Entry = ListNode<AnimeNode, MyListStatus>;
@@ -61,6 +64,7 @@ export function AnimeListBrowser({
   const [status, setStatus] = useState<ListStatus | "all">(initialStatus);
   const [type, setType] = useState("all");
   const [sort, setSort] = useState<SortValue>("title");
+  const [filters, setFilters] = useState<ListFilters>(DEFAULT_LIST_FILTERS);
 
   const counts = useMemo(() => {
     return entries.reduce<Record<string, number>>((acc, e) => {
@@ -70,13 +74,18 @@ export function AnimeListBrowser({
     }, {});
   }, [entries]);
 
-  const filtered = useMemo(() => {
+  const statusTypeFiltered = useMemo(() => {
     return entries
       .filter((e) => status === "all" || e.list_status.status === status)
-      .filter((e) => type === "all" || e.node.media_type === type)
+      .filter((e) => type === "all" || e.node.media_type === type);
+  }, [entries, status, type]);
+
+  const filtered = useMemo(() => {
+    return statusTypeFiltered
+      .filter((e) => matchesListFilters(e.node, filters))
       .slice()
       .sort(COMPARATORS[sort]);
-  }, [entries, status, type, sort]);
+  }, [statusTypeFiltered, filters, sort]);
 
   function handleUpdated(animeId: number, update: Partial<MyListStatus>) {
     setEntries((prev) =>
@@ -137,10 +146,24 @@ export function AnimeListBrowser({
             ))}
           </SelectContent>
         </Select>
+
+        <ListFilterButton
+          nodes={statusTypeFiltered.map((e) => e.node)}
+          filters={filters}
+          onChange={setFilters}
+        />
       </div>
 
       {filtered.length === 0 ? (
-        <EmptyState title="Nothing here yet" description="Anime you add to this status will show up here." />
+        statusTypeFiltered.length > 0 ? (
+          <EmptyState title="No matches" description="Try adjusting or clearing your filters.">
+            <Button type="button" variant="outline" size="sm" onClick={() => setFilters(DEFAULT_LIST_FILTERS)}>
+              Clear filters
+            </Button>
+          </EmptyState>
+        ) : (
+          <EmptyState title="Nothing here yet" description="Anime you add to this status will show up here." />
+        )
       ) : (
         <RevealList
           items={filtered.map(({ node, list_status }) => (
