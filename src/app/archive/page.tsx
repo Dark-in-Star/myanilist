@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import clsx from "clsx";
 import { getSeasonalAnime } from "@/lib/api";
 import { loadMoreSeasonalAnime } from "@/lib/browseActions";
 import { toAnimeGridItem } from "@/lib/gridItems";
 import { MediaLoadMoreGrid } from "@/components/MediaLoadMoreGrid";
 import { GridSkeleton } from "@/components/GridSkeleton";
 import { EmptyState } from "@/components/EmptyState";
-import { SEASON_ORDER, formatSeasonLabel, getCurrentAnimeSeason, isAnimeSeason, shiftSeason } from "@/lib/format";
+import { SeasonPickerModal } from "@/components/SeasonPickerModal";
+import { formatSeasonLabel, getCurrentAnimeSeason, isAnimeSeason, shiftSeason } from "@/lib/format";
 import type { AnimeSeason } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Archive" };
@@ -68,9 +68,7 @@ export default async function ArchivePage({
           </span>
         </Link>
 
-        <h2 className="text-base font-bold text-foreground sm:text-lg">
-          {formatSeasonLabel(season)} {year}
-        </h2>
+        <SeasonPickerModal year={year} season={season} />
 
         <Link
           href={`/archive?year=${next.year}&season=${next.season}`}
@@ -81,23 +79,6 @@ export default async function ArchivePage({
           </span>
           <span aria-hidden="true">→</span>
         </Link>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {SEASON_ORDER.map((s) => (
-          <Link
-            key={s}
-            href={`/archive?year=${year}&season=${s}`}
-            className={clsx(
-              "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-all duration-200",
-              s === season
-                ? "border-accent bg-accent text-accent-foreground shadow-sm shadow-accent/30"
-                : "border-border/60 bg-surface text-muted hover:-translate-y-0.5 hover:border-accent hover:text-accent",
-            )}
-          >
-            {formatSeasonLabel(s)}
-          </Link>
-        ))}
       </div>
 
       <Suspense key={`${year}-${season}`} fallback={<GridSkeleton />}>

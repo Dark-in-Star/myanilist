@@ -16,14 +16,17 @@ test.describe("Anime archive", () => {
     await expect(page.locator('a[href^="/anime/"]').first()).toBeVisible();
   });
 
-  test("season pills switch the selected season for the same year", async ({ page }) => {
+  test("the year/season modal jumps straight to the chosen season", async ({ page }) => {
     await page.goto("/archive?year=2023&season=fall");
-    await expect(page.getByRole("heading", { name: "Fall 2023" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Fall 2023" })).toBeVisible();
 
-    await page.getByRole("link", { name: "Winter", exact: true }).click();
+    await page.getByRole("button", { name: "Fall 2023" }).click();
+    await page.getByLabel("Year").fill("2019");
+    await page.getByRole("button", { name: "Winter", exact: true }).click();
+    await page.getByRole("button", { name: "Go" }).click();
 
-    await expect(page).toHaveURL(/year=2023&season=winter/);
-    await expect(page.getByRole("heading", { name: "Winter 2023" })).toBeVisible();
+    await expect(page).toHaveURL(/year=2019&season=winter/);
+    await expect(page.getByRole("button", { name: "Winter 2019" })).toBeVisible();
   });
 
   test("prev/next navigation rolls over into adjacent years", async ({ page, isMobile }) => {
@@ -33,7 +36,7 @@ test.describe("Anime archive", () => {
 
     await page.getByRole("link", { name: /Fall 2023/ }).click();
     await expect(page).toHaveURL(/year=2023&season=fall/);
-    await expect(page.getByRole("heading", { name: "Fall 2023" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Fall 2023" })).toBeVisible();
 
     await page.getByRole("link", { name: /Winter 2024/ }).click();
     await expect(page).toHaveURL(/year=2024&season=winter/);
