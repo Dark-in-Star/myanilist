@@ -21,7 +21,8 @@ test.describe("Anime archive", () => {
     await expect(page.getByRole("button", { name: "Fall 2023" })).toBeVisible();
 
     await page.getByRole("button", { name: "Fall 2023" }).click();
-    await page.getByLabel("Year").fill("2019");
+    await page.getByRole("combobox", { name: "Year" }).click();
+    await page.getByRole("option", { name: "2019" }).click();
     await page.getByRole("button", { name: "Winter", exact: true }).click();
     await page.getByRole("button", { name: "Go" }).click();
 

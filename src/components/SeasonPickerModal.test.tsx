@@ -20,26 +20,25 @@ describe("SeasonPickerModal", () => {
     expect(screen.getByRole("button", { name: "Fall 2023" })).toBeVisible();
   });
 
+  it("shows the current year selected in the dropdown when opened", async () => {
+    const user = userEvent.setup();
+    render(<SeasonPickerModal year={2023} season="fall" />);
+
+    await user.click(screen.getByRole("button", { name: "Fall 2023" }));
+
+    expect(screen.getByRole("combobox", { name: "Year" })).toHaveTextContent("2023");
+  });
+
   it("navigates to the chosen year and season on Go", async () => {
     const user = userEvent.setup();
     render(<SeasonPickerModal year={2023} season="fall" />);
 
     await user.click(screen.getByRole("button", { name: "Fall 2023" }));
-    await user.clear(screen.getByLabelText("Year"));
-    await user.type(screen.getByLabelText("Year"), "2019");
+    await user.click(screen.getByRole("combobox", { name: "Year" }));
+    await user.click(screen.getByRole("option", { name: "2019" }));
     await user.click(screen.getByRole("button", { name: "Winter" }));
     await user.click(screen.getByRole("button", { name: "Go" }));
 
     expect(push).toHaveBeenCalledWith("/archive?year=2019&season=winter");
-  });
-
-  it("disables Go when the year field is empty", async () => {
-    const user = userEvent.setup();
-    render(<SeasonPickerModal year={2023} season="fall" />);
-
-    await user.click(screen.getByRole("button", { name: "Fall 2023" }));
-    await user.clear(screen.getByLabelText("Year"));
-
-    expect(screen.getByRole("button", { name: "Go" })).toBeDisabled();
   });
 });

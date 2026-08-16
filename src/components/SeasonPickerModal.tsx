@@ -13,10 +13,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SEASON_ORDER, formatSeasonLabel } from "@/lib/format";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SEASON_ORDER, formatSeasonLabel, getCurrentAnimeSeason } from "@/lib/format";
 import type { AnimeSeason } from "@/lib/types";
+
+// MAL's earliest listed anime dates to 1917; the upper bound leaves room for
+// "upcoming" seasons a year out.
+const EARLIEST_YEAR = 1917;
 
 export function SeasonPickerModal({ year, season }: { year: number; season: AnimeSeason }) {
   const router = useRouter();
@@ -39,8 +43,9 @@ export function SeasonPickerModal({ year, season }: { year: number; season: Anim
     setOpen(false);
   }
 
-  const parsedYear = Number(pendingYear);
-  const isValidYear = pendingYear.trim() !== "" && Number.isInteger(parsedYear);
+  const latestYear = getCurrentAnimeSeason().year + 1;
+  const yearOptions = Array.from({ length: latestYear - EARLIEST_YEAR + 1 }, (_, i) => latestYear - i);
+  const isValidYear = yearOptions.includes(Number(pendingYear));
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -72,13 +77,18 @@ export function SeasonPickerModal({ year, season }: { year: number; season: Anim
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="archive-year">Year</Label>
-            <Input
-              id="archive-year"
-              type="number"
-              inputMode="numeric"
-              value={pendingYear}
-              onChange={(e) => setPendingYear(e.target.value)}
-            />
+            <Select value={pendingYear} onValueChange={setPendingYear}>
+              <SelectTrigger id="archive-year" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {yearOptions.map((y) => (
+                  <SelectItem key={y} value={String(y)}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex flex-col gap-1.5">
