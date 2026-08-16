@@ -142,7 +142,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ id
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_1fr]">
-        <aside className="order-2 flex flex-col gap-4 lg:order-1">
+        <aside className="order-2 flex min-w-0 flex-col gap-4 lg:order-1">
           <AnimeListStatusPanel
             anime={anime}
             initial={anime.my_list_status}
@@ -226,7 +226,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ id
           </dl>
         </aside>
 
-        <div className="order-1 flex flex-col gap-8 lg:order-2">
+        <div className="order-1 flex min-w-0 flex-col gap-8 lg:order-2">
           {anime.recommendations && anime.recommendations.length > 0 && (
             <MediaRow title="Recommendations">
               {anime.recommendations.map((rec) => (
