@@ -52,7 +52,7 @@ test.describe("Anime browsing", () => {
 
   test("changing the list status dropdown persists after reload, then can be removed", async ({ page, baseURL }) => {
     // Runs against the in-memory mock server (e2e/mock-server.mjs), never the real
-    // myanilist-server / a live MyAnimeList account.
+    // the real MyAnimeList API / a live account.
     await loginAs(page, baseURL!);
     await page.goto("/browse?media=anime&type=all");
     await page.locator('a[href^="/anime/"]').first().click();

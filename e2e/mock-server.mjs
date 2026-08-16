@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import { URL } from "node:url";
 
-// A tiny in-memory stand-in for myanilist-server, used only by the e2e suite.
+// A tiny in-memory stand-in for the real MyAnimeList API, used only by the e2e suite.
 // It never talks to the real MyAnimeList API, so e2e runs can freely exercise
 // list-mutation flows without touching anyone's real account.
 
@@ -85,7 +85,7 @@ function paginate(list, searchParams) {
   return { page, offset, hasMore };
 }
 
-// Mirrors myanilist-server: authenticated endpoints require the caller's own
+// Mirrors the real MyAnimeList API: authenticated endpoints require the caller's own
 // Bearer token instead of a server-wide one. Any non-empty token is accepted here
 // (this is a mock), so tests only need to set a plausible-looking session cookie.
 function bearerToken(req) {
@@ -258,5 +258,5 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`mock myanilist-server listening on http://localhost:${PORT}`);
+  console.log(`mock MyAnimeList API listening on http://localhost:${PORT}`);
 });

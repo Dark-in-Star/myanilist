@@ -21,7 +21,7 @@ export default defineConfig({
     { name: "tablet", use: { ...devices["iPad Mini"] } },
   ],
 
-  // e2e runs never touch the real myanilist-server / real MyAnimeList account.
+  // e2e runs never touch the real MyAnimeList API / a real account.
   // A tiny in-memory mock (e2e/mock-server.mjs) stands in for it, so list-mutation
   // tests are free to write/delete without any risk to real user data.
   webServer: [

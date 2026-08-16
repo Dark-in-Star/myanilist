@@ -8,7 +8,7 @@ function base64url(input: Buffer): string {
   return input.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
-function requireClientId(): string {
+export function requireClientId(): string {
   const id = process.env.MAL_CLIENT_ID;
   if (!id) throw new Error("MAL_CLIENT_ID is not configured");
   return id;

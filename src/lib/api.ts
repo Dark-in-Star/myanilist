@@ -1,4 +1,5 @@
 import "server-only";
+import { requireClientId } from "./malAuth";
 import { getValidAccessToken } from "./session";
 import type {
   AnimeNode,
@@ -15,7 +16,11 @@ import type {
   RankingNode,
 } from "./types";
 
-const BASE_URL = process.env.MAL_API_BASE_URL ?? "http://localhost:3000";
+// Talks to MAL's API directly from Next.js server-side code (Server Components,
+// Server Actions) — no separate backend to run or deploy. MAL_API_BASE_URL stays
+// overridable so e2e tests can still point this at an in-memory mock (see
+// e2e/mock-server.mjs) without touching a real MyAnimeList account.
+const BASE_URL = process.env.MAL_API_BASE_URL ?? "https://api.myanimelist.net/v2";
 
 export class ApiError extends Error {
   status: number;
@@ -55,6 +60,12 @@ interface FetchOptions {
   token?: string;
 }
 
+// MAL's public endpoints (search, ranking, season, and detail without a caller
+// token) authenticate with the app's own client ID instead of a user's token.
+function authHeaders(token?: string): Record<string, string> {
+  return token ? { Authorization: `Bearer ${token}` } : { "X-MAL-CLIENT-ID": requireClientId() };
+}
+
 async function apiGet<T>(path: string, options: FetchOptions = {}): Promise<T> {
   const { query, revalidate = 300, cache, token } = options;
   const url = `${BASE_URL}${path}${buildQuery(query)}`;
@@ -64,10 +75,10 @@ async function apiGet<T>(path: string, options: FetchOptions = {}): Promise<T> {
     response = await fetch(url, {
       cache,
       next: cache ? undefined : { revalidate },
-      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      headers: authHeaders(token),
     });
   } catch {
-    throw new ApiError(503, "Could not reach myanilist-server. Is it running?");
+    throw new ApiError(503, "Could not reach the MyAnimeList API.");
   }
 
   if (!response.ok) {

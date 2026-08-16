@@ -23,6 +23,7 @@ function mockFetchOnce(body: unknown, init: { ok?: boolean; status?: number } = 
 
 beforeEach(() => {
   process.env.MAL_API_BASE_URL = "http://localhost:3000";
+  process.env.MAL_CLIENT_ID = "test-client-id";
   mockGetValidAccessToken.mockResolvedValue(null);
 });
 
@@ -57,14 +58,16 @@ describe("getAnimeRanking", () => {
 });
 
 describe("getAnime", () => {
-  it("returns the parsed anime on success when logged out (no Authorization header)", async () => {
+  it("sends the app's client ID header (not a token) when logged out", async () => {
     const fetchMock = mockFetchOnce({ id: 1, title: "Frieren" });
 
     const result = await getAnime(1);
 
     expect(result).toEqual({ id: 1, title: "Frieren" });
     const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(init.headers).toBeUndefined();
+    const headers = init.headers as Record<string, string>;
+    expect(headers["X-MAL-CLIENT-ID"]).toBe("test-client-id");
+    expect(headers.Authorization).toBeUndefined();
   });
 
   it("forwards the session token as a Bearer header when logged in", async () => {
