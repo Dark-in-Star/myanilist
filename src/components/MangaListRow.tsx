@@ -64,7 +64,7 @@ export function MangaListRow({
     <>
       <div
         data-testid={`manga-list-row-${node.id}`}
-        className="flex items-start gap-3 rounded-xl border border-border bg-surface p-3 sm:gap-4"
+        className="flex items-start gap-3 rounded-xl border border-border bg-surface p-3 sm:gap-4 mx-4 sm:mx-0"
       >
         <Link
           href={`/manga/${node.id}`}

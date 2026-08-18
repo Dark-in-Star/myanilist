@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 import clsx from "clsx";
 import { AccountMenu } from "./AccountMenu";
+import { MobileMediaToggle } from "./MobileMediaToggle";
 import { MobileProfileSheet } from "./MobileProfileSheet";
 import { SearchBar } from "./SearchBar";
 import { ThemeToggle } from "./ThemeToggle";
@@ -22,11 +23,26 @@ export function NavBar({
 }) {
   const pathname = usePathname();
   const isHome = pathname === "/" || pathname.startsWith("/mylist");
+  const isMyList = pathname.startsWith("/mylist");
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
       <div className="relative mx-auto flex h-14 max-w-7xl items-center gap-3 px-3 sm:h-16 sm:px-6">
-        <Link href="/" className="flex shrink-0 items-center">
+        {isMyList && (
+          <div className="flex shrink-0 items-center sm:hidden">
+            <Suspense fallback={<div className="h-8 w-28 rounded-full bg-surface-muted" />}>
+              <MobileMediaToggle />
+            </Suspense>
+          </div>
+        )}
+
+        <Link
+          href="/"
+          className={clsx(
+            "flex shrink-0 items-center",
+            isMyList && "max-sm:absolute max-sm:left-1/2 max-sm:top-1/2 max-sm:-translate-x-1/2 max-sm:-translate-y-1/2",
+          )}
+        >
           <Image src="/brand.webp" alt="MyAniList" width={707} height={353} priority className="h-10 w-auto sm:h-12" />
         </Link>
 

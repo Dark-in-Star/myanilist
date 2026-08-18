@@ -10,18 +10,38 @@ import { MediaTypeToggle } from "./MediaTypeToggle";
 import { RevealList } from "./RevealList";
 import { ScrollableTabRow } from "./ScrollableTabRow";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { MANGA_LIST_STATUS_LABELS } from "@/lib/format";
 import { matchesListFilters, matchesQuery } from "@/lib/list-filters";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
-import { clearSearchAndFilters, setFilters, setQuery, setSort, setStatus, setType } from "@/lib/store/listFiltersSlice";
-import type { ListNode, MangaListStatus, MangaNode, MyMangaListStatusNode } from "@/lib/types";
+import {
+  clearSearchAndFilters,
+  setFilters,
+  setQuery,
+  setSort,
+  setStatus,
+  setType,
+} from "@/lib/store/listFiltersSlice";
+import type {
+  ListNode,
+  MangaListStatus,
+  MangaNode,
+  MyMangaListStatusNode,
+} from "@/lib/types";
 
 type Entry = ListNode<MangaNode, MyMangaListStatusNode>;
 
 const STATUS_TABS: { value: MangaListStatus | "all"; label: string }[] = [
   { value: "all", label: "All" },
-  ...(Object.entries(MANGA_LIST_STATUS_LABELS) as [MangaListStatus, string][]).map(([value, label]) => ({
+  ...(
+    Object.entries(MANGA_LIST_STATUS_LABELS) as [MangaListStatus, string][]
+  ).map(([value, label]) => ({
     value,
     label,
   })),
@@ -52,9 +72,15 @@ type SortValue = (typeof SORT_OPTIONS)[number]["value"];
 const COMPARATORS: Record<SortValue, (a: Entry, b: Entry) => number> = {
   title: (a, b) => a.node.title.localeCompare(b.node.title),
   score: (a, b) => (b.list_status.score ?? 0) - (a.list_status.score ?? 0),
-  chapters: (a, b) => (b.list_status.num_chapters_read ?? 0) - (a.list_status.num_chapters_read ?? 0),
-  start_date: (a, b) => (b.node.start_date ?? "").localeCompare(a.node.start_date ?? ""),
-  updated: (a, b) => (b.list_status.updated_at ?? "").localeCompare(a.list_status.updated_at ?? ""),
+  chapters: (a, b) =>
+    (b.list_status.num_chapters_read ?? 0) -
+    (a.list_status.num_chapters_read ?? 0),
+  start_date: (a, b) =>
+    (b.node.start_date ?? "").localeCompare(a.node.start_date ?? ""),
+  updated: (a, b) =>
+    (b.list_status.updated_at ?? "").localeCompare(
+      a.list_status.updated_at ?? "",
+    ),
 };
 
 export function MangaListBrowser({
@@ -66,7 +92,9 @@ export function MangaListBrowser({
 }) {
   const [entries, setEntries] = useState(initialEntries);
   const dispatch = useAppDispatch();
-  const status = useAppSelector((s) => s.listFilters.manga.status) as MangaListStatus | "all";
+  const status = useAppSelector((s) => s.listFilters.manga.status) as
+    | MangaListStatus
+    | "all";
   const type = useAppSelector((s) => s.listFilters.manga.type);
   const sort = useAppSelector((s) => s.listFilters.manga.sort) as SortValue;
   const filters = useAppSelector((s) => s.listFilters.manga.filters);
@@ -102,9 +130,16 @@ export function MangaListBrowser({
       .sort(COMPARATORS[sort]);
   }, [statusTypeFiltered, filters, query, sort]);
 
-  function handleUpdated(mangaId: number, update: Partial<MyMangaListStatusNode>) {
+  function handleUpdated(
+    mangaId: number,
+    update: Partial<MyMangaListStatusNode>,
+  ) {
     setEntries((prev) =>
-      prev.map((e) => (e.node.id === mangaId ? { ...e, list_status: { ...e.list_status, ...update } } : e)),
+      prev.map((e) =>
+        e.node.id === mangaId
+          ? { ...e, list_status: { ...e.list_status, ...update } }
+          : e,
+      ),
     );
   }
 
@@ -114,87 +149,133 @@ export function MangaListBrowser({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold sm:text-2xl">My Manga List</h1>
-          <MediaTypeToggle active="manga" />
+      <div className="sticky top-14 z-30 flex flex-col gap-5 border-b border-border bg-surface/90 backdrop-blur sm:top-16 sm:rounded-2xl sm:border px-5 py-3 sm:py-5">
+        <div className="hidden flex-wrap items-center gap-3 sm:flex">
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-bold sm:text-2xl">My Manga List</h1>
+            <MediaTypeToggle active="manga" />
+          </div>
+          <ListSearchBar
+            value={query}
+            onChange={(value) =>
+              dispatch(setQuery({ media: "manga", query: value }))
+            }
+            placeholder="Search your manga list..."
+            hideMobile
+          />
         </div>
-        <ListSearchBar
-          value={query}
-          onChange={(value) => dispatch(setQuery({ media: "manga", query: value }))}
-          placeholder="Search your manga list..."
-        />
-      </div>
 
-      <ScrollableTabRow className="-mx-3 border-b border-border px-3 sm:mx-0 sm:px-0">
-        {STATUS_TABS.map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={() => dispatch(setStatus({ media: "manga", status: tab.value }))}
-            className={clsx(
-              "-mb-px shrink-0 whitespace-nowrap border-b-2 px-2.5 py-2.5 text-sm transition-colors sm:px-3.5",
-              tab.value === status
-                ? "border-accent font-semibold text-foreground"
-                : "border-transparent font-medium text-muted hover:text-foreground",
-            )}
+        <ScrollableTabRow className="-mx-3 border-b border-border px-3 sm:mx-0 sm:px-0">
+          {STATUS_TABS.map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() =>
+                dispatch(setStatus({ media: "manga", status: tab.value }))
+              }
+              className={clsx(
+                "-mb-px shrink-0 whitespace-nowrap border-b-2 px-2.5 py-2.5 text-sm transition-colors sm:px-3.5",
+                tab.value === status
+                  ? "border-accent font-semibold text-foreground"
+                  : "border-transparent font-medium text-muted hover:text-foreground",
+              )}
+            >
+              {tab.label}
+              {tab.value !== "all" && counts[tab.value] ? (
+                <span className="ml-1 text-xs text-muted">
+                  ({counts[tab.value]})
+                </span>
+              ) : null}
+            </button>
+          ))}
+        </ScrollableTabRow>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="hidden sm:block">
+            <Select
+              value={type}
+              onValueChange={(value) =>
+                dispatch(setType({ media: "manga", type: value }))
+              }
+            >
+              <SelectTrigger aria-label="Type" className="w-fit min-w-28">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TYPE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Select
+            value={sort}
+            onValueChange={(value) =>
+              dispatch(setSort({ media: "manga", sort: value }))
+            }
           >
-            {tab.label}
-            {tab.value !== "all" && counts[tab.value] ? (
-              <span className="ml-1 text-xs text-muted">({counts[tab.value]})</span>
-            ) : null}
-          </button>
-        ))}
-      </ScrollableTabRow>
+            <SelectTrigger aria-label="Sort" className="w-fit min-w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SORT_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <Select value={type} onValueChange={(value) => dispatch(setType({ media: "manga", type: value }))}>
-          <SelectTrigger aria-label="Type" className="w-fit min-w-28">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {TYPE_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <ListFilterButton
+            nodes={statusTypeFiltered.map((e) => e.node)}
+            filters={filters}
+            onChange={(value) =>
+              dispatch(setFilters({ media: "manga", filters: value }))
+            }
+            typeOptions={TYPE_OPTIONS}
+            type={type}
+            onTypeChange={(value) =>
+              dispatch(setType({ media: "manga", type: value }))
+            }
+          />
 
-        <Select value={sort} onValueChange={(value) => dispatch(setSort({ media: "manga", sort: value }))}>
-          <SelectTrigger aria-label="Sort" className="w-fit min-w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {SORT_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <ListFilterButton
-          nodes={statusTypeFiltered.map((e) => e.node)}
-          filters={filters}
-          onChange={(value) => dispatch(setFilters({ media: "manga", filters: value }))}
-        />
+          <ListSearchBar
+            value={query}
+            onChange={(value) =>
+              dispatch(setQuery({ media: "manga", query: value }))
+            }
+            placeholder="Search your manga list..."
+            hideDesktop
+            mobileDockRight={false}
+          />
+        </div>
       </div>
 
       {filtered.length === 0 ? (
         statusTypeFiltered.length > 0 ? (
-          <EmptyState title="No matches" description="Try adjusting or clearing your search and filters.">
+          <EmptyState
+            title="No matches"
+            description="Try adjusting or clearing your search and filters."
+          >
             <Button
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => dispatch(clearSearchAndFilters({ media: "manga" }))}
+              onClick={() =>
+                dispatch(clearSearchAndFilters({ media: "manga" }))
+              }
             >
               Clear search &amp; filters
             </Button>
           </EmptyState>
         ) : (
-          <EmptyState title="Nothing here yet" description="Manga you add to this status will show up here." />
+          <EmptyState
+            title="Nothing here yet"
+            description="Manga you add to this status will show up here."
+          />
         )
       ) : (
         <RevealList
