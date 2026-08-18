@@ -28,6 +28,7 @@ import { AnimeTrailer } from "@/components/AnimeTrailer";
 import { AnimeCharacters } from "@/components/AnimeCharacters";
 import { AnimeStaff } from "@/components/AnimeStaff";
 import { NextEpisodeCountdown } from "@/components/NextEpisodeCountdown";
+import { AddToGoogleCalendarButton } from "@/components/AddToGoogleCalendarButton";
 import { MediaRow, MediaRowItem } from "@/components/MediaRow";
 import { MediaCard } from "@/components/MediaCard";
 import {
@@ -73,26 +74,12 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ id
     <>
       <AnimeListStatusPanel anime={anime} initial={anime.my_list_status} isAuthenticated={Boolean(session)} />
 
-      <a
-        href={`https://myanimelist.net/anime/${anime.id}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center justify-between gap-2 rounded-xl border border-border bg-surface px-4 py-3 text-sm font-medium text-foreground transition-colors hover:border-accent hover:text-accent"
-      >
-        <span className="flex items-center gap-2">
-          <Image
-            src="https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png"
-            alt=""
-            width={16}
-            height={16}
-            className="rounded-sm"
-          />
-          Open in Myanimelist
-        </span>
-        <ExternalLink className="size-3.5 text-muted" />
-      </a>
-
-      {anime.status === "currently_airing" && nextEpisode && <NextEpisodeCountdown schedule={nextEpisode} />}
+      {anime.status === "currently_airing" && nextEpisode && (
+        <>
+          <NextEpisodeCountdown schedule={nextEpisode} />
+          <AddToGoogleCalendarButton anime={anime} nextEpisode={nextEpisode} />
+        </>
+      )}
 
       {relatedAnime.length > 0 && (
         <div className="flex flex-col gap-2">
@@ -225,12 +212,32 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ id
 
             <GenreTags genres={anime.genres} />
 
-            <Link
-              href={`/anime/${anime.id}/watch`}
-              className="flex w-fit items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold transition-colors text-white hover:bg-primary/80"
-            >
-              <Play className="size-4" /> Watch Now
-            </Link>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href={`/anime/${anime.id}/watch`}
+                className="flex w-fit shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg bg-primary px-4 py-2 text-sm font-semibold transition-colors text-white hover:bg-primary/80"
+              >
+                <Play className="size-4" /> Watch Now
+              </Link>
+
+              <a
+                href={`https://myanimelist.net/anime/${anime.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Open in MyAnimeList"
+                className="flex w-fit shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-border bg-surface px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:border-accent hover:text-accent sm:px-4"
+              >
+                <Image
+                  src="https://cdn.myanimelist.net/img/sp/icon/apple-touch-icon-256.png"
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="rounded-sm"
+                />
+                <span className="hidden sm:inline">Open in MyAnimeList</span>
+                <ExternalLink className="size-3.5 text-muted" />
+              </a>
+            </div>
 
             {anime.synopsis && (
               <p className="max-w-3xl whitespace-pre-line text-sm leading-relaxed text-foreground">

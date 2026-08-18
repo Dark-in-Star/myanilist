@@ -6,6 +6,7 @@ const ANILIST_API_URL = "https://graphql.anilist.co";
 const NEXT_AIRING_EPISODE_QUERY = `
   query ($malId: Int) {
     Media(idMal: $malId, type: ANIME) {
+      id
       nextAiringEpisode {
         airingAt
         timeUntilAiring
@@ -18,6 +19,7 @@ const NEXT_AIRING_EPISODE_QUERY = `
 interface AniListNextAiringResponse {
   data?: {
     Media?: {
+      id: number;
       nextAiringEpisode?: {
         airingAt: number;
         timeUntilAiring: number;
@@ -51,13 +53,15 @@ export async function getNextAiringEpisode(malId: number, revalidate = 300): Pro
   if (!response.ok) return null;
 
   const json = (await response.json()) as AniListNextAiringResponse;
-  const next = json.data?.Media?.nextAiringEpisode;
-  if (!next) return null;
+  const media = json.data?.Media;
+  const next = media?.nextAiringEpisode;
+  if (!media || !next) return null;
 
   return {
     episode: next.episode,
     airingAt: new Date(next.airingAt * 1000).toISOString(),
     timeUntilAiring: next.timeUntilAiring,
+    anilistId: media.id,
   };
 }
 
