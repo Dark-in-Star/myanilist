@@ -36,6 +36,8 @@ export interface NextAiringEpisode {
   airingAt: string;
   /** Seconds until airing, as of when this was fetched — use `airingAt` for a live countdown instead. */
   timeUntilAiring: number;
+  /** AniList's own media id, for linking to https://anilist.co/anime/{anilistId}. */
+  anilistId: number;
 }
 
 export interface AnimeTrailer {

@@ -35,9 +35,7 @@ const THEME_INIT_SCRIPT = `
   (function () {
     try {
       var stored = localStorage.getItem("theme");
-      var theme = stored === "light" || stored === "dark"
-        ? stored
-        : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      var theme = stored === "light" || stored === "dark" ? stored : "dark";
       document.documentElement.setAttribute("data-theme", theme);
     } catch (e) {}
   })();
@@ -71,7 +69,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <Providers>
           <NavBar isAuthenticated={Boolean(session)} pictureUrl={pictureUrl} userName={userName} />
-          <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-6 sm:px-6 sm:py-8">{children}</main>
+          <main className="mx-auto w-full max-w-7xl flex-1 px-3 pt-2 pb-6 sm:px-6 sm:py-8">{children}</main>
           <Footer />
           <div className="h-16 lg:hidden" aria-hidden="true" />
           <BottomNav />

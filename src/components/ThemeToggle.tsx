@@ -9,16 +9,12 @@ const THEME_EVENT = "themechange";
 
 function readTheme(): Theme {
   const stored = window.localStorage.getItem("theme");
-  if (stored === "light" || stored === "dark") return stored;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return stored === "light" || stored === "dark" ? stored : "dark";
 }
 
 function subscribe(callback: () => void) {
-  const media = window.matchMedia("(prefers-color-scheme: dark)");
-  media.addEventListener("change", callback);
   window.addEventListener(THEME_EVENT, callback);
   return () => {
-    media.removeEventListener("change", callback);
     window.removeEventListener(THEME_EVENT, callback);
   };
 }

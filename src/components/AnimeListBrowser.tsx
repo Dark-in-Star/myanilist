@@ -114,71 +114,87 @@ export function AnimeListBrowser({
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-bold sm:text-2xl">My Anime List</h1>
-          <MediaTypeToggle active="anime" />
+      <div className="sticky top-14 z-30 flex flex-col gap-5 border-b border-border bg-surface/90 backdrop-blur sm:top-16 sm:rounded-2xl sm:border px-5 py-3 sm:py-5">
+        <div className="hidden flex-wrap items-center gap-3 sm:flex">
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-bold sm:text-2xl">My Anime List</h1>
+            <MediaTypeToggle active="anime" />
+          </div>
+          <ListSearchBar
+            value={query}
+            onChange={(value) => dispatch(setQuery({ media: "anime", query: value }))}
+            placeholder="Search your anime list..."
+            hideMobile
+          />
         </div>
-        <ListSearchBar
-          value={query}
-          onChange={(value) => dispatch(setQuery({ media: "anime", query: value }))}
-          placeholder="Search your anime list..."
-        />
-      </div>
 
-      <ScrollableTabRow className="-mx-3 border-b border-border px-3 sm:mx-0 sm:px-0">
-        {STATUS_TABS.map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={() => dispatch(setStatus({ media: "anime", status: tab.value }))}
-            className={clsx(
-              "-mb-px shrink-0 whitespace-nowrap border-b-2 px-2.5 py-2.5 text-sm transition-colors sm:px-3.5",
-              tab.value === status
-                ? "border-accent font-semibold text-foreground"
-                : "border-transparent font-medium text-muted hover:text-foreground",
-            )}
-          >
-            {tab.label}
-            {tab.value !== "all" && counts[tab.value] ? (
-              <span className="ml-1 text-xs text-muted">({counts[tab.value]})</span>
-            ) : null}
-          </button>
-        ))}
-      </ScrollableTabRow>
+        <ScrollableTabRow className="-mx-3 border-b border-border px-3 sm:mx-0 sm:px-0">
+          {STATUS_TABS.map((tab) => (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => dispatch(setStatus({ media: "anime", status: tab.value }))}
+              className={clsx(
+                "-mb-px shrink-0 whitespace-nowrap border-b-2 px-2.5 py-2.5 text-sm transition-colors sm:px-3.5",
+                tab.value === status
+                  ? "border-accent font-semibold text-foreground"
+                  : "border-transparent font-medium text-muted hover:text-foreground",
+              )}
+            >
+              {tab.label}
+              {tab.value !== "all" && counts[tab.value] ? (
+                <span className="ml-1 text-xs text-muted">({counts[tab.value]})</span>
+              ) : null}
+            </button>
+          ))}
+        </ScrollableTabRow>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <Select value={type} onValueChange={(value) => dispatch(setType({ media: "anime", type: value }))}>
-          <SelectTrigger aria-label="Type" className="w-fit min-w-28">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {TYPE_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="hidden sm:block">
+            <Select value={type} onValueChange={(value) => dispatch(setType({ media: "anime", type: value }))}>
+              <SelectTrigger aria-label="Type" className="w-fit min-w-28">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TYPE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <Select value={sort} onValueChange={(value) => dispatch(setSort({ media: "anime", sort: value }))}>
-          <SelectTrigger aria-label="Sort" className="w-fit min-w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {SORT_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <Select value={sort} onValueChange={(value) => dispatch(setSort({ media: "anime", sort: value }))}>
+            <SelectTrigger aria-label="Sort" className="w-fit min-w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SORT_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-        <ListFilterButton
-          nodes={statusTypeFiltered.map((e) => e.node)}
-          filters={filters}
-          onChange={(value) => dispatch(setFilters({ media: "anime", filters: value }))}
-        />
+          <ListFilterButton
+            nodes={statusTypeFiltered.map((e) => e.node)}
+            filters={filters}
+            onChange={(value) => dispatch(setFilters({ media: "anime", filters: value }))}
+            typeOptions={TYPE_OPTIONS}
+            type={type}
+            onTypeChange={(value) => dispatch(setType({ media: "anime", type: value }))}
+          />
+
+          <ListSearchBar
+            value={query}
+            onChange={(value) => dispatch(setQuery({ media: "anime", query: value }))}
+            placeholder="Search your anime list..."
+            hideDesktop
+            mobileDockRight={false}
+          />
+        </div>
       </div>
 
       {filtered.length === 0 ? (

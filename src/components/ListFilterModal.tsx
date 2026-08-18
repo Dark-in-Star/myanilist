@@ -40,12 +40,18 @@ export function ListFilterModal({
   genreFacets,
   filters,
   onApply,
+  typeOptions,
+  type,
+  onTypeChange,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   genreFacets: GenreFacet[];
   filters: ListFilters;
   onApply: (filters: ListFilters) => void;
+  typeOptions?: { value: string; label: string }[];
+  type?: string;
+  onTypeChange?: (type: string) => void;
 }) {
   const [draft, setDraft] = useState(filters);
   // Re-seed the draft from committed filters each time the modal opens, without
@@ -104,6 +110,31 @@ export function ListFilterModal({
         </DialogDescription>
 
         <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 py-5">
+          {typeOptions && typeOptions.length > 0 && (
+            <div className="flex flex-col gap-3 sm:hidden">
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+                Type
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {typeOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => onTypeChange?.(option.value)}
+                    className={clsx(
+                      "rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
+                      type === option.value
+                        ? "border-accent bg-accent text-accent-foreground"
+                        : "border-border bg-surface text-muted hover:border-accent hover:text-accent",
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <span className="text-xs font-semibold uppercase tracking-wide text-muted">
             Rating
           </span>

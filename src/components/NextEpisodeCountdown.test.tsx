@@ -15,7 +15,7 @@ describe("NextEpisodeCountdown", () => {
   it("renders the episode number and a countdown", () => {
     render(
       <NextEpisodeCountdown
-        schedule={{ episode: 44, airingAt: "2026-08-23T03:00:00Z", timeUntilAiring: 604800 }}
+        schedule={{ episode: 44, airingAt: "2026-08-23T03:00:00Z", timeUntilAiring: 604800, anilistId: 101922 }}
       />,
     );
     expect(screen.getByText("Episode 44 airs")).toBeInTheDocument();
@@ -25,7 +25,7 @@ describe("NextEpisodeCountdown", () => {
   it("counts down as time passes", () => {
     render(
       <NextEpisodeCountdown
-        schedule={{ episode: 44, airingAt: "2026-08-16T00:01:00Z", timeUntilAiring: 60 }}
+        schedule={{ episode: 44, airingAt: "2026-08-16T00:01:00Z", timeUntilAiring: 60, anilistId: 101922 }}
       />,
     );
     expect(screen.getByText(/1 minute/)).toBeInTheDocument();
@@ -38,7 +38,7 @@ describe("NextEpisodeCountdown", () => {
   it("shows 'Airing now' once the countdown reaches zero", () => {
     render(
       <NextEpisodeCountdown
-        schedule={{ episode: 44, airingAt: "2026-08-16T00:00:05Z", timeUntilAiring: 5 }}
+        schedule={{ episode: 44, airingAt: "2026-08-16T00:00:05Z", timeUntilAiring: 5, anilistId: 101922 }}
       />,
     );
     act(() => {
