@@ -3,15 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ThemeToggle } from "./ThemeToggle";
 
-function mockSystemTheme(prefersDark: boolean) {
-  window.matchMedia = vi.fn().mockImplementation((query: string) => ({
-    matches: prefersDark,
-    media: query,
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-  })) as unknown as typeof window.matchMedia;
-}
-
 beforeEach(() => {
   window.localStorage.clear();
   document.documentElement.removeAttribute("data-theme");
@@ -22,15 +13,13 @@ afterEach(() => {
 });
 
 describe("ThemeToggle", () => {
-  it("defaults to the system theme when nothing is stored", () => {
-    mockSystemTheme(true);
+  it("defaults to dark when nothing is stored", () => {
     render(<ThemeToggle />);
 
     expect(screen.getByRole("button", { name: "Switch to light mode" })).toBeInTheDocument();
   });
 
-  it("respects a previously stored preference over the system theme", () => {
-    mockSystemTheme(true);
+  it("respects a previously stored preference over the default", () => {
     window.localStorage.setItem("theme", "light");
     render(<ThemeToggle />);
 
@@ -38,7 +27,7 @@ describe("ThemeToggle", () => {
   });
 
   it("toggling sets the data-theme attribute and persists to localStorage", async () => {
-    mockSystemTheme(false);
+    window.localStorage.setItem("theme", "light");
     const user = userEvent.setup();
     render(<ThemeToggle />);
 
@@ -50,7 +39,6 @@ describe("ThemeToggle", () => {
   });
 
   it("toggling twice returns to the original theme", async () => {
-    mockSystemTheme(false);
     const user = userEvent.setup();
     render(<ThemeToggle />);
 
@@ -58,7 +46,7 @@ describe("ThemeToggle", () => {
     await user.click(button());
     await user.click(button());
 
-    expect(document.documentElement.getAttribute("data-theme")).toBe("light");
-    expect(window.localStorage.getItem("theme")).toBe("light");
+    expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+    expect(window.localStorage.getItem("theme")).toBe("dark");
   });
 });
