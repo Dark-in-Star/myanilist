@@ -1,0 +1,67 @@
+apply plugin: "com.android.application"
+
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+def hasKeystoreProperties = keystorePropertiesFile.exists()
+if (hasKeystoreProperties) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace "to.myanilist.app"
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "to.myanilist.app"
+        minSdkVersion 21
+        targetSdkVersion 36
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    signingConfigs {
+        release {
+            if (hasKeystoreProperties) {
+                storeFile rootProject.file(keystoreProperties["storeFile"])
+                storePassword keystoreProperties["storePassword"]
+                keyAlias keystoreProperties["keyAlias"]
+                keyPassword keystoreProperties["keyPassword"]
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            if (hasKeystoreProperties) {
+                signingConfig signingConfigs.release
+            } else {
+                // Deliberately unsigned rather than falling back to debug signing — a release
+                // build must be signed with the real release key. See android/keystore.properties.example.
+                signingConfig null
+            }
+        }
+        debug {
+            // Default debug signingConfig (Android SDK's auto-generated debug.keystore) is fine here.
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation "com.google.androidbrowserhelper:androidbrowserhelper:2.7.3"
+    implementation "androidx.appcompat:appcompat:1.7.0"
+}
+
+if (gradle.startParameter.taskNames.any { it.toLowerCase().contains("release") } && !hasKeystoreProperties) {
+    throw new GradleException(
+        "Release build requested but android/keystore.properties is missing. " +
+        "Copy android/keystore.properties.example to android/keystore.properties and fill in " +
+        "your real release keystore details — see the \"Android App (TWA)\" section of README.md."
+    )
+}

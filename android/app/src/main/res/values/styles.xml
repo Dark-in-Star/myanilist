@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- windowBackground matches the splash color so the very first frame Android draws
+         (before any app/library code runs) is already correct — this is what actually
+         prevents the white flash, the androidbrowserhelper splash view is drawn on top of it. -->
+    <style name="Theme.Launcher" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/splashScreenBackground</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="colorPrimaryDark">@color/statusBarColorDark</item>
+    </style>
+</resources>

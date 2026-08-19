@@ -1,0 +1,17 @@
+# Build outputs
+*.iml
+.gradle/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+
+# Android Studio
+.idea/
+*.hprof
+
+# Release signing — NEVER commit these
+*.jks
+*.keystore
+keystore.properties
