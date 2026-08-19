@@ -41,7 +41,7 @@
   "fingerprints": [
     {
       "name": "Play App Signing / release key",
-      "value": "REPLACE_WITH_YOUR_SHA256_FINGERPRINT"
+      "value": "D4:5C:E8:A2:78:84:C9:F6:21:20:C8:30:AC:1A:9B:01:7E:0A:32:4F:24:2C:21:B5:38:7F:93:AB:48:85:73:3B"
     }
   ]
 }

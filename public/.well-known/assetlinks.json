@@ -1,11 +1,10 @@
 [
   {
-    "_comment": "Digital Asset Links for the MyAniList Android TWA. REPLACE_WITH_YOUR_SHA256_FINGERPRINT must be replaced with the real release-signing certificate's SHA-256 fingerprint before this app can verify. See the 'Android App (TWA)' section of README.md for how to generate it. Never invent or reuse a fingerprint you don't control.",
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
       "package_name": "to.myanilist.app",
-      "sha256_cert_fingerprints": ["REPLACE_WITH_YOUR_SHA256_FINGERPRINT"]
+      "sha256_cert_fingerprints": ["D4:5C:E8:A2:78:84:C9:F6:21:20:C8:30:AC:1A:9B:01:7E:0A:32:4F:24:2C:21:B5:38:7F:93:AB:48:85:73:3B"]
     }
   }
 ]
