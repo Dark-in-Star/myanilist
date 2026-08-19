@@ -1,0 +1,47 @@
+{
+  "packageId": "to.myanilist.app",
+  "host": "myanilist.vercel.app",
+  "name": "MyAniList",
+  "launcherName": "MyAniList",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#0f1218",
+  "themeColorDark": "#0f1218",
+  "navigationColor": "#0f1218",
+  "navigationColorDark": "#0f1218",
+  "navigationDividerColor": "#0f1218",
+  "navigationDividerColorDark": "#0f1218",
+  "backgroundColor": "#0f1218",
+  "enableNotifications": false,
+  "startUrl": "/",
+  "iconUrl": "https://myanilist.vercel.app/icons/icon-512.png",
+  "maskableIconUrl": "https://myanilist.vercel.app/icons/maskable-icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./release.jks",
+    "alias": "myanilist"
+  },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "hand-authored — see the \"Android App (TWA)\" section of README.md",
+  "webManifestUrl": "https://myanilist.vercel.app/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://myanilist.vercel.app/",
+  "minSdkVersion": 21,
+  "protocolHandlers": [],
+  "retainedBundles": [],
+  "fingerprints": [
+    {
+      "name": "Play App Signing / release key",
+      "value": "REPLACE_WITH_YOUR_SHA256_FINGERPRINT"
+    }
+  ]
+}

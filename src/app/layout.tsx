@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NavBar } from "@/components/NavBar";
 import { BottomNav } from "@/components/BottomNav";
 import { Footer } from "@/components/Footer";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { Providers } from "./Providers";
 import { getMyUserInfo } from "@/lib/api";
 import { getSession } from "@/lib/session";
@@ -27,8 +28,15 @@ export const metadata: Metadata = {
   icons: {
     icon: "/logo.webp",
     shortcut: "/logo.webp",
-    apple: "/logo.webp",
+    apple: "/icons/apple-touch-icon.png",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f1218" },
+  ],
 };
 
 const THEME_INIT_SCRIPT = `
@@ -74,6 +82,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <div className="h-16 lg:hidden" aria-hidden="true" />
           <BottomNav />
         </Providers>
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
