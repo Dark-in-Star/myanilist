@@ -158,11 +158,11 @@ export default async function BrowsePage({
       </div>
 
       {q ? (
-        <Suspense key={`search-${media}-${q}`} fallback={<GridSkeleton />}>
+        <Suspense key={`search-${media}-${q}`} fallback={<GridSkeleton toolbar />}>
           {media === "manga" ? <MangaSearchResults q={q} /> : <AnimeSearchResults q={q} />}
         </Suspense>
       ) : (
-        <Suspense key={`rank-${media}-${params.type ?? "all"}`} fallback={<GridSkeleton />}>
+        <Suspense key={`rank-${media}-${params.type ?? "all"}`} fallback={<GridSkeleton toolbar rankingTabs />}>
           {media === "manga" ? (
             <MangaRankingResults
               type={isMangaRankingType(params.type) ? params.type : "all"}

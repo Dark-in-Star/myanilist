@@ -93,7 +93,7 @@ export default async function ArchivePage({
         </Link>
       </div>
 
-      <Suspense key={`${year}-${season}`} fallback={<GridSkeleton />}>
+      <Suspense key={`${year}-${season}`} fallback={<GridSkeleton toolbar />}>
         <SeasonResults year={year} season={season} />
       </Suspense>
     </div>

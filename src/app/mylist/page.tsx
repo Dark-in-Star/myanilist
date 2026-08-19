@@ -4,7 +4,6 @@ import { AnimeListBrowser } from "@/components/AnimeListBrowser";
 import { MangaListBrowser } from "@/components/MangaListBrowser";
 import { LoginPrompt } from "@/components/LoginPrompt";
 import type { ListStatus, MangaListStatus } from "@/lib/types";
-import "@/app/mylist/mylist.css";
 
 export const metadata: Metadata = { title: "My List" };
 

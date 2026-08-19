@@ -1,6 +1,6 @@
 function ListRowSkeleton() {
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-border bg-surface p-3 sm:gap-4">
+    <div className="mx-4 flex items-start gap-3 rounded-xl border border-border bg-surface p-3 sm:mx-0 sm:gap-4">
       <div className="h-20 w-14 shrink-0 animate-pulse rounded-lg bg-surface-muted sm:h-24 sm:w-16" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
@@ -39,20 +39,28 @@ function ListRowSkeleton() {
 export default function MyListLoading() {
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-        <div className="h-7 w-40 animate-pulse rounded bg-surface-muted sm:h-8" />
-        <div className="h-9 w-32 animate-pulse rounded-full bg-surface-muted" />
-      </div>
+      <div className="sticky top-14 z-30 flex flex-col gap-5 border-b border-border bg-surface/90 backdrop-blur sm:top-16 sm:rounded-2xl sm:border px-5 py-3 sm:py-5">
+        {/* Title + media toggle + search only render on desktop — mobile shows the toggle in the nav bar instead. */}
+        <div className="hidden flex-wrap items-center gap-3 sm:flex">
+          <div className="flex items-center gap-3">
+            <div className="h-7 w-40 animate-pulse rounded bg-surface-muted sm:h-8" />
+            <div className="h-9 w-32 animate-pulse rounded-full bg-surface-muted" />
+          </div>
+          <div className="ml-auto h-9 w-64 animate-pulse rounded-full bg-surface-muted" />
+        </div>
 
-      <div className="flex gap-4 overflow-hidden border-b border-border pb-2.5">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="h-4 w-16 shrink-0 animate-pulse rounded bg-surface-muted" />
-        ))}
-      </div>
+        <div className="flex gap-4 overflow-hidden border-b border-border pb-2.5">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-4 w-16 shrink-0 animate-pulse rounded bg-surface-muted" />
+          ))}
+        </div>
 
-      <div className="flex gap-2">
-        <div className="h-8 w-24 animate-pulse rounded-lg bg-surface-muted" />
-        <div className="h-8 w-28 animate-pulse rounded-lg bg-surface-muted" />
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="hidden h-9 w-28 animate-pulse rounded-lg bg-surface-muted sm:block" />
+          <div className="h-9 w-40 animate-pulse rounded-lg bg-surface-muted" />
+          <div className="ml-auto h-9 w-24 animate-pulse rounded-lg bg-surface-muted" />
+          <div className="h-9 w-9 shrink-0 animate-pulse rounded-lg bg-surface-muted sm:hidden" />
+        </div>
       </div>
 
       <div className="flex flex-col gap-2.5">
