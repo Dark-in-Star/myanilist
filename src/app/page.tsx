@@ -83,14 +83,14 @@ export default function Home() {
             className="object-cover"
           />
           <div className="absolute inset-0 bg-black/55" />
-          <div className="absolute inset-x-0 top-[10%] bottom-[21%] flex flex-col items-center justify-center gap-3 px-4 text-center sm:gap-4">
+          <div className="absolute inset-x-0 top-[25%] bottom-[25%] flex flex-col items-center justify-center gap-3 px-4 text-center sm:gap-4">
             <Image
               src="/logo.webp"
               alt=""
-              width={112}
-              height={112}
+              width={256}
+              height={256}
               priority
-              className="h-14 w-14 drop-shadow-lg sm:h-20 sm:w-20 md:h-24 md:w-24"
+              className="h-36 w-36 drop-shadow-lg sm:h-32 sm:w-32 md:h-40 md:w-40"
             />
             <h1
               className={`${heroFont.className} text-4xl font-extrabold text-white drop-shadow-lg sm:text-6xl md:text-7xl`}
@@ -100,10 +100,8 @@ export default function Home() {
             <p className={`${heroFont.className} max-w-lg text-base font-semibold text-white/90 drop-shadow sm:text-xl md:text-2xl`}>
               Anime &amp; Manga Tracker for MyAnimeList
             </p>
-          </div>
-          <div className="absolute inset-x-0 bottom-[9%] flex justify-center px-4 sm:bottom-[11%]">
-            <div className="w-full max-w-md">
-              <SearchBar className="border-white/40 bg-white/95 text-neutral-900 shadow-lg shadow-black/30 ring-1 ring-black/5 placeholder:text-neutral-500 focus-visible:border-accent dark:border-white/40 dark:bg-white/95 dark:text-neutral-900 dark:placeholder:text-neutral-500 dark:shadow-black/40" />
+            <div className="w-full max-w-md my-8">
+              <SearchBar className="border-accent bg-white/15 text-white shadow-lg shadow-black/30 ring-1 ring-white/20 backdrop-blur-md placeholder:text-white/70 focus-visible:border-accent focus-visible:ring-accent/40 dark:border-accent dark:bg-white/15 dark:text-white dark:placeholder:text-white/70 dark:shadow-black/40" />
             </div>
           </div>
         </div>
