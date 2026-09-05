@@ -5,17 +5,12 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "cdn.myanimelist.net",
+        hostname: "**",
         pathname: "/**",
       },
       {
-        protocol: "https",
-        hostname: "cdn.nekosapi.com",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "*.anilist.co",
+        protocol: "http",
+        hostname: "**",
         pathname: "/**",
       },
     ],

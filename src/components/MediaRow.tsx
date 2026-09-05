@@ -85,5 +85,5 @@ export function MediaRow({
 }
 
 export function MediaRowItem({ children }: { children: ReactNode }) {
-  return <div className="w-32.5 shrink-0 sm:w-40 md:w-45">{children}</div>;
+  return <div className="w-[calc((100vw-2.25rem)/2)] shrink-0 sm:w-40 md:w-45">{children}</div>;
 }
