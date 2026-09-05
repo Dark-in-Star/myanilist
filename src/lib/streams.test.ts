@@ -6,6 +6,16 @@ function server(serverName: string, dataType: string, id = `${serverName}-${data
   return { $id: id, serverName, dataLink: `https://flixcloud.cc/e/${id}`, dataType };
 }
 
+/** The flix body is read with `.text()` so the reader fallback can share one parser. */
+function flixResponse(body: unknown, ok = true) {
+  return {
+    ok,
+    status: ok ? 200 : 403,
+    headers: { get: () => null },
+    text: async () => (typeof body === "string" ? body : JSON.stringify(body)),
+  };
+}
+
 /** First call is the AniList id lookup, second is the flix request. */
 function mockChain(anilistId: number | null, flix: unknown, flixOk = true) {
   const fetchMock = vi.fn();
@@ -13,7 +23,7 @@ function mockChain(anilistId: number | null, flix: unknown, flixOk = true) {
     ok: true,
     json: async () => ({ data: { Media: anilistId === null ? null : { id: anilistId } } }),
   });
-  fetchMock.mockResolvedValueOnce({ ok: flixOk, json: async () => flix });
+  fetchMock.mockResolvedValueOnce(flixResponse(flix, flixOk));
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
 }
@@ -64,9 +74,38 @@ describe("getStreamSources", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("throws when the flix request fails", async () => {
-    mockChain(154587, {}, false);
+  // A blocked direct call is exactly the deployed-egress case, so it must fall through to
+  // the reader rather than failing outright.
+  it("falls back to the reader when the direct flix request is rejected", async () => {
+    const fetchMock = mockChain(154587, {}, false);
+    fetchMock.mockResolvedValueOnce(
+      flixResponse({ success: true, servers: [server("HD-2", "sub")] }),
+    );
+
+    const result = await getStreamSources(52991, 1);
+
+    expect(result?.servers).toHaveLength(1);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    const [readerUrl, readerInit] = fetchMock.mock.calls[2];
+    expect(readerUrl).toBe("https://r.jina.ai/https://reanime.to/api/flix/154587/1");
+    // Without this header the reader wraps the body in markdown and it will not parse.
+    expect(readerInit.headers["x-respond-with"]).toBe("text");
+  });
+
+  it("throws only once both the direct call and the reader have failed", async () => {
+    const fetchMock = mockChain(154587, {}, false);
+    fetchMock.mockResolvedValueOnce(flixResponse({}, false));
+
     await expect(getStreamSources(52991, 1)).rejects.toBeInstanceOf(StreamSourceError);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("does not call the reader when the direct request succeeds", async () => {
+    const fetchMock = mockChain(154587, { success: true, servers: [server("HD-1", "sub")] });
+
+    await getStreamSources(52991, 1);
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("sends a browser-like User-Agent so Cloudflare does not serve an interstitial", async () => {
