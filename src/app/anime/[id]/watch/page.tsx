@@ -4,7 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Tv } from "lucide-react";
 import { ApiError, getAnime } from "@/lib/api";
-import { getAnimeExtras } from "@/lib/anilist";
+import { getAnimeExtras, getNextAiringEpisode } from "@/lib/anilist";
+import { airedEpisodeCount } from "@/lib/airedEpisodes";
 import { WatchHerePlayer } from "@/components/WatchHerePlayer";
 
 async function loadAnime(id: number) {
@@ -28,9 +29,15 @@ export async function generateMetadata({
 
 export default async function WatchAnimePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [anime, extras] = await Promise.all([loadAnime(Number(id)), getAnimeExtras(Number(id))]);
+  const [anime, extras, schedule] = await Promise.all([
+    loadAnime(Number(id)),
+    getAnimeExtras(Number(id)),
+    getNextAiringEpisode(Number(id)),
+  ]);
   const streamingLinks = extras?.streamingLinks ?? [];
-  const episodeCount = anime.num_episodes && anime.num_episodes > 0 ? anime.num_episodes : 1;
+  // `num_episodes` is the planned total, so an airing show would otherwise list episodes
+  // that have not been broadcast yet and cannot resolve to a source.
+  const episodeCount = airedEpisodeCount(anime.num_episodes, anime.status, schedule);
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -59,7 +66,12 @@ export default async function WatchAnimePage({ params }: { params: Promise<{ id:
         </div>
       </div>
 
-      <WatchHerePlayer malId={anime.id} episodeCount={episodeCount} />
+      <WatchHerePlayer
+        malId={anime.id}
+        episodeCount={episodeCount}
+        upcomingEpisode={schedule?.episode}
+        airingAt={schedule?.airingAt}
+      />
 
       <div className="flex flex-col gap-3">
         <h2 className="text-lg font-bold text-foreground sm:text-xl">Official platforms</h2>
