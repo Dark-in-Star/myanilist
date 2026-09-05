@@ -39,11 +39,11 @@ export function WatchHerePlayer({ malId, episodeCount }: { malId: number; episod
       const result = await loadStreamSources(malId, targetEpisode);
       if (requestIdRef.current !== requestId) return;
 
-      if (!result) {
-        setPhase("empty");
+      if (result.status !== "ok") {
+        setPhase(result.status === "error" ? "error" : "empty");
         return;
       }
-      setSources(result);
+      setSources(result.sources);
       setPhase("ready");
     } catch {
       if (requestIdRef.current !== requestId) return;

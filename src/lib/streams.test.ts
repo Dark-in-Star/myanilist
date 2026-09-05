@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getStreamSources, pickDefaultServer } from "./streams";
+import { StreamSourceError, getStreamSources, pickDefaultServer } from "./streams";
 import type { StreamServer } from "./types";
 
 function server(serverName: string, dataType: string, id = `${serverName}-${dataType}`) {
@@ -55,16 +55,29 @@ describe("getStreamSources", () => {
     expect(await getStreamSources(52991, 1)).toBeNull();
   });
 
-  it("returns null without calling flix when AniList has no id", async () => {
+  // An unresolvable id is overwhelmingly an unreachable AniList rather than an unknown
+  // title, so it must not be reported to the user as "no source for this episode".
+  it("throws without calling flix when AniList has no id", async () => {
     const fetchMock = mockChain(null, { success: true, servers: [server("HD-1", "sub")] });
 
-    expect(await getStreamSources(999999, 1)).toBeNull();
+    await expect(getStreamSources(999999, 1)).rejects.toBeInstanceOf(StreamSourceError);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("returns null when the flix request fails", async () => {
+  it("throws when the flix request fails", async () => {
     mockChain(154587, {}, false);
-    expect(await getStreamSources(52991, 1)).toBeNull();
+    await expect(getStreamSources(52991, 1)).rejects.toBeInstanceOf(StreamSourceError);
+  });
+
+  it("sends a browser-like User-Agent so Cloudflare does not serve an interstitial", async () => {
+    const fetchMock = mockChain(154587, { success: true, servers: [server("HD-1", "sub")] });
+
+    await getStreamSources(52991, 1);
+
+    const init = fetchMock.mock.calls[1][1];
+    expect(init.headers["User-Agent"]).toMatch(/Mozilla/);
+    // The origin sends `no-store`; without this Next refuses to populate the Data Cache.
+    expect(init.cache).toBe("force-cache");
   });
 
   it("drops servers with an unrecognised audio track", async () => {
