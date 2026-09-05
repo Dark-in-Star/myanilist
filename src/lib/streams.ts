@@ -1,6 +1,5 @@
 import "server-only";
 import { getAniListId } from "./anilist";
-import { proxyDispatcher } from "./egressProxy";
 import type { StreamServer, StreamSources } from "./types";
 
 /**
@@ -64,7 +63,6 @@ export async function getStreamSources(
       },
       cache: "force-cache",
       next: { revalidate },
-      ...proxyDispatcher(),
     });
   } catch {
     throw new StreamSourceError("The stream source could not be reached.");
