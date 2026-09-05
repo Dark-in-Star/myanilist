@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { AlertTriangle, Loader2, Play } from "lucide-react";
+import { AlertTriangle, CalendarClock, Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { loadStreamSources } from "@/lib/streamActions";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,18 @@ import type { StreamServer, StreamSources } from "@/lib/types";
 type Audio = "sub" | "dub";
 type Phase = "idle" | "loading" | "ready" | "empty" | "error";
 
+function formatAiringDate(iso: string): string | null {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleString(undefined, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 /** Mirrors pickDefaultServer in src/lib/streams.ts — the site's own HD-2-first order. */
 function pickServer(servers: StreamServer[], audio: Audio): StreamServer | undefined {
   const matching = servers.filter((server) => server.audio === audio);
@@ -17,7 +29,19 @@ function pickServer(servers: StreamServer[], audio: Audio): StreamServer | undef
   return pool.find((server) => server.serverName === "HD-2") ?? pool[0];
 }
 
-export function WatchHerePlayer({ malId, episodeCount }: { malId: number; episodeCount: number }) {
+export function WatchHerePlayer({
+  malId,
+  episodeCount,
+  upcomingEpisode,
+  airingAt,
+}: {
+  malId: number;
+  /** Episodes that have actually aired — not the planned run. */
+  episodeCount: number;
+  upcomingEpisode?: number;
+  /** ISO 8601 UTC timestamp for `upcomingEpisode`. */
+  airingAt?: string;
+}) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [episode, setEpisode] = useState(1);
   const [audio, setAudio] = useState<Audio>("sub");
@@ -56,7 +80,24 @@ export function WatchHerePlayer({ malId, episodeCount }: { malId: number; episod
   const hasDub = servers.some((server) => server.audio === "dub");
   const hasSub = servers.some((server) => server.audio === "sub");
 
-  const episodes = Array.from({ length: Math.max(episodeCount, 1) }, (_, i) => i + 1);
+  const episodes = Array.from({ length: Math.max(episodeCount, 0) }, (_, i) => i + 1);
+  const nextAirsLabel = airingAt ? formatAiringDate(airingAt) : null;
+
+  if (episodeCount < 1) {
+    return (
+      <section className="flex flex-col gap-3">
+        <h2 className="text-lg font-bold text-foreground sm:text-xl">Watch here</h2>
+        <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border bg-surface px-4 py-10 text-center">
+          <CalendarClock className="size-5 text-muted" />
+          <p className="text-sm text-muted">
+            {nextAirsLabel
+              ? `No episodes have aired yet. Episode ${upcomingEpisode} airs ${nextAirsLabel}.`
+              : "No episodes have aired yet."}
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   if (phase === "idle") {
     return (
@@ -106,6 +147,13 @@ export function WatchHerePlayer({ malId, episodeCount }: { malId: number; episod
           </div>
         )}
 
+        {/*
+          No `sandbox` here: the embed is an ArtPlayer/hls.js page that reads
+          `localStorage` while initialising, and a sandboxed frame gets an opaque origin
+          where that read throws a SecurityError, so playback never starts. That is why
+          the same URL plays in a normal tab but stayed blank in the app. `referrerPolicy`
+          is likewise left at the default, so the CDN's hotlink checks still see an origin.
+        */}
         {phase === "ready" && active && (
           <iframe
             key={active.embedUrl}
@@ -113,8 +161,6 @@ export function WatchHerePlayer({ malId, episodeCount }: { malId: number; episod
             title={`Episode ${episode}`}
             allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
             allowFullScreen
-            referrerPolicy="no-referrer"
-            sandbox="allow-scripts allow-same-origin allow-presentation"
             className="absolute inset-0 h-full w-full"
           />
         )}
@@ -170,6 +216,13 @@ export function WatchHerePlayer({ malId, episodeCount }: { malId: number; episod
             </button>
           ))}
         </div>
+        {upcomingEpisode !== undefined && upcomingEpisode > episodeCount && (
+          <p className="text-xs text-muted">
+            {nextAirsLabel
+              ? `Episode ${upcomingEpisode} airs ${nextAirsLabel}.`
+              : `Episode ${upcomingEpisode} hasn't aired yet.`}
+          </p>
+        )}
       </div>
 
       <p className="text-xs text-muted">
