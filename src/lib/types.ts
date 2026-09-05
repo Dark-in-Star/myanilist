@@ -73,6 +73,21 @@ export interface StreamingLink {
 }
 
 /** Trailer/characters/staff/streaming links, sourced from AniList — MAL's API doesn't expose any of this. */
+/** One playable source for a single episode, as returned by the flix resolver. */
+export interface StreamServer {
+  id: string;
+  /** e.g. "HD-1", "HD-2". */
+  serverName: string;
+  /** An embed *page* URL, not a video file — it goes in an iframe src. */
+  embedUrl: string;
+  audio: "sub" | "dub";
+}
+
+export interface StreamSources {
+  episode: number;
+  servers: StreamServer[];
+}
+
 export interface AnimeExtras {
   trailer: AnimeTrailer | null;
   streamingLinks: StreamingLink[];

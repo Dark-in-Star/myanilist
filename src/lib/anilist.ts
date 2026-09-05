@@ -65,6 +65,38 @@ export async function getNextAiringEpisode(malId: number, revalidate = 300): Pro
   };
 }
 
+const ANILIST_ID_QUERY = `
+  query ($malId: Int) {
+    Media(idMal: $malId, type: ANIME) {
+      id
+    }
+  }
+`;
+
+/**
+ * Maps a MAL anime id to its AniList media id. Kept here so there is only ever one
+ * AniList client in the codebase. Returns null when AniList doesn't know the title
+ * or the request fails — callers treat a missing id as "no data", never as an error.
+ */
+export async function getAniListId(malId: number, revalidate = 86400): Promise<number | null> {
+  let response: Response;
+  try {
+    response = await fetch(ANILIST_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ query: ANILIST_ID_QUERY, variables: { malId } }),
+      next: { revalidate },
+    });
+  } catch {
+    return null;
+  }
+
+  if (!response.ok) return null;
+
+  const json = (await response.json()) as AniListNextAiringResponse;
+  return json.data?.Media?.id ?? null;
+}
+
 const ANIME_EXTRAS_QUERY = `
   query ($malId: Int) {
     Media(idMal: $malId, type: ANIME) {
