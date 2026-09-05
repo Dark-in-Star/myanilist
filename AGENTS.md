@@ -43,11 +43,6 @@ Copy `.env.example` to `.env.local` and set `MAL_CLIENT_ID` (from a MAL app regi
 type "other"/PKCE). `MAL_API_BASE_URL` is optional — only set it to point at a local mock
 (e2e does this automatically via `playwright.config.ts`).
 
-`STREAM_PROXY_URL` is optional and only matters in deployed environments. Cloudflare
-challenges requests from datacentre IPs, so the stream-source lookups in `src/lib/streams.ts`
-can work locally and 403 on Vercel; setting it routes those calls (and AniList's) through an
-HTTP proxy via `src/lib/egressProxy.ts`. Unset, the app fetches directly and is unaffected.
-
 ## Conventions
 
 - Package manager is `pnpm` (see `packageManager` in `package.json`) — don't use npm/yarn.
