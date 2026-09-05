@@ -1,4 +1,4 @@
-import type { AnimeNode, Genre, MangaNode } from "./types";
+import type { AnimeNode, Genre, MangaNode, MyListEntryStatus } from "./types";
 
 export interface GridItem {
   id: number;
@@ -10,6 +10,8 @@ export interface GridItem {
   rank?: number;
   genres?: Genre[];
   startDate?: string;
+  /** The visitor's own list status for this title, when they're logged in and tracking it. */
+  listStatus?: MyListEntryStatus;
 }
 
 export function toAnimeGridItem(node: AnimeNode, rank?: number): GridItem {
@@ -23,6 +25,7 @@ export function toAnimeGridItem(node: AnimeNode, rank?: number): GridItem {
     rank,
     genres: node.genres,
     startDate: node.start_date,
+    listStatus: node.my_list_status?.status,
   };
 }
 
@@ -37,5 +40,6 @@ export function toMangaGridItem(node: MangaNode, rank?: number): GridItem {
     rank,
     genres: node.genres,
     startDate: node.start_date,
+    listStatus: node.my_list_status?.status,
   };
 }

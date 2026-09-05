@@ -111,11 +111,15 @@ export default async function MangaDetailPage({ params }: { params: Promise<{ id
               {manga.related_manga.map((rel) => (
                 <MediaRowItem key={rel.node.id}>
                   <MediaCard
+                    id={rel.node.id}
+                    media="manga"
                     href={`/manga/${rel.node.id}`}
                     title={rel.node.title}
                     imageUrl={rel.node.main_picture?.large ?? rel.node.main_picture?.medium}
                     mean={rel.node.mean}
+                    genres={rel.node.genres}
                     subtitle={rel.relation_type_formatted}
+                    listStatus={rel.node.my_list_status?.status}
                   />
                 </MediaRowItem>
               ))}
@@ -127,11 +131,15 @@ export default async function MangaDetailPage({ params }: { params: Promise<{ id
               {manga.recommendations.map((rec) => (
                 <MediaRowItem key={rec.node.id}>
                   <MediaCard
+                    id={rec.node.id}
+                    media="manga"
                     href={`/manga/${rec.node.id}`}
                     title={rec.node.title}
                     imageUrl={rec.node.main_picture?.large ?? rec.node.main_picture?.medium}
                     mean={rec.node.mean}
+                    genres={rec.node.genres}
                     mediaType={rec.node.media_type}
+                    listStatus={rec.node.my_list_status?.status}
                   />
                 </MediaRowItem>
               ))}

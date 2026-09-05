@@ -3,7 +3,7 @@ import Link from "next/link";
 import { formatMediaType } from "@/lib/format";
 import { ScoreBadge } from "./ScoreBadge";
 import { MediaCardAddButton } from "./MediaCardAddButton";
-import { Genre } from "@/lib/types";
+import { Genre, MyListEntryStatus } from "@/lib/types";
 import { MAX_VISIBLE_GENRES } from "@/lib/constants";
 
 interface MediaCardProps {
@@ -19,7 +19,8 @@ interface MediaCardProps {
   /** Numeric MAL id — required to offer the add-to-list button. */
   id?: number;
   media?: "anime" | "manga";
-  inList?: boolean;
+  /** The visitor's own list status for this title, when they track it. */
+  listStatus?: MyListEntryStatus;
 }
 
 export function MediaCard({
@@ -34,7 +35,7 @@ export function MediaCard({
   genres,
   id,
   media,
-  inList,
+  listStatus,
 }: MediaCardProps) {
   const allGenres = genres ?? [];
   const visibleGenres = allGenres.slice(0, MAX_VISIBLE_GENRES);
@@ -81,7 +82,7 @@ export function MediaCard({
             title={title}
             mediaType={mediaType}
             media={resolvedMedia}
-            inList={inList}
+            listStatus={listStatus}
           />
         )}
       </div>

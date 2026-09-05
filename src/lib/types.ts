@@ -86,6 +86,9 @@ export type MangaStatus = "finished" | "currently_publishing" | "not_yet_publish
 export type ListStatus = "watching" | "completed" | "on_hold" | "dropped" | "plan_to_watch";
 export type MangaListStatus = "reading" | "completed" | "on_hold" | "dropped" | "plan_to_read";
 
+/** Either media's list status — what a card knows about an entry without caring which. */
+export type MyListEntryStatus = ListStatus | MangaListStatus;
+
 export interface MyListStatus {
   status?: ListStatus;
   score: number;

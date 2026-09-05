@@ -132,6 +132,7 @@ export function MediaLoadMoreGrid({
               genres={item.genres}
               mediaType={item.mediaType}
               rank={item.rank}
+              listStatus={item.listStatus}
             />
           ))}
         </MediaGrid>
