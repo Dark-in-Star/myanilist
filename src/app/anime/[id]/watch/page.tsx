@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Tv } from "lucide-react";
 import { ApiError, getAnime } from "@/lib/api";
 import { getAnimeExtras } from "@/lib/anilist";
+import { WatchHerePlayer } from "@/components/WatchHerePlayer";
 
 async function loadAnime(id: number) {
   try {
@@ -29,6 +30,7 @@ export default async function WatchAnimePage({ params }: { params: Promise<{ id:
   const { id } = await params;
   const [anime, extras] = await Promise.all([loadAnime(Number(id)), getAnimeExtras(Number(id))]);
   const streamingLinks = extras?.streamingLinks ?? [];
+  const episodeCount = anime.num_episodes && anime.num_episodes > 0 ? anime.num_episodes : 1;
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -53,49 +55,54 @@ export default async function WatchAnimePage({ params }: { params: Promise<{ id:
         </div>
         <div className="flex flex-col gap-1">
           <h1 className="text-lg font-bold text-foreground">{anime.title}</h1>
-          <p className="text-sm text-muted">Choose an officially licensed platform to watch on</p>
+          <p className="text-sm text-muted">Watch on an officially licensed platform, or stream here</p>
         </div>
       </div>
 
-      {streamingLinks.length > 0 ? (
-        <div className="flex flex-col divide-y divide-border rounded-xl border border-border bg-surface">
-          {streamingLinks.map((link) => (
+      <WatchHerePlayer malId={anime.id} episodeCount={episodeCount} />
+
+      <div className="flex flex-col gap-3">
+        <h2 className="text-lg font-bold text-foreground sm:text-xl">Official platforms</h2>
+        {streamingLinks.length > 0 ? (
+          <div className="flex flex-col divide-y divide-border rounded-xl border border-border bg-surface">
+            {streamingLinks.map((link) => (
+              <a
+                key={link.url}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between gap-3 px-4 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-surface-muted"
+              >
+                <span className="flex items-center gap-3">
+                  {link.icon ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={link.icon} alt="" className="size-5 shrink-0 rounded" />
+                  ) : (
+                    <Tv className="size-5 shrink-0 text-muted" />
+                  )}
+                  {link.site}
+                  {link.language && link.language !== "Japanese" && (
+                    <span className="text-xs font-normal text-muted">{link.language}</span>
+                  )}
+                </span>
+                <ExternalLink className="size-3.5 shrink-0 text-muted" />
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-surface px-4 py-10 text-center">
+            <p className="text-sm text-muted">No officially licensed streaming platform is listed for this title yet.</p>
             <a
-              key={link.url}
-              href={link.url}
+              href={`https://myanimelist.net/anime/${anime.id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between gap-3 px-4 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-surface-muted"
+              className="flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
             >
-              <span className="flex items-center gap-3">
-                {link.icon ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={link.icon} alt="" className="size-5 shrink-0 rounded" />
-                ) : (
-                  <Tv className="size-5 shrink-0 text-muted" />
-                )}
-                {link.site}
-                {link.language && link.language !== "Japanese" && (
-                  <span className="text-xs font-normal text-muted">{link.language}</span>
-                )}
-              </span>
-              <ExternalLink className="size-3.5 shrink-0 text-muted" />
+              Check MyAnimeList <ExternalLink className="size-3.5" />
             </a>
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-surface px-4 py-10 text-center">
-          <p className="text-sm text-muted">No officially licensed streaming platform is listed for this title yet.</p>
-          <a
-            href={`https://myanimelist.net/anime/${anime.id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-sm font-medium text-accent hover:underline"
-          >
-            Check MyAnimeList <ExternalLink className="size-3.5" />
-          </a>
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
