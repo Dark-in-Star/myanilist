@@ -1,7 +1,17 @@
 import "server-only";
+import { proxyDispatcher } from "./egressProxy";
 import type { AnimeExtras, NextAiringEpisode } from "./types";
 
 const ANILIST_API_URL = "https://graphql.anilist.co";
+
+// AniList sits behind Cloudflare and rate-limits per client. Node's fetch sends no
+// User-Agent, which Cloudflare treats as a bot signal from datacentre IPs — the reason
+// these lookups can succeed locally and fail once deployed.
+const ANILIST_HEADERS = {
+  "Content-Type": "application/json",
+  Accept: "application/json",
+  "User-Agent": "MyAniList/1.0 (+https://myanilist.vercel.app)",
+} as const;
 
 const NEXT_AIRING_EPISODE_QUERY = `
   query ($malId: Int) {
@@ -42,9 +52,10 @@ export async function getNextAiringEpisode(malId: number, revalidate = 300): Pro
   try {
     response = await fetch(ANILIST_API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: ANILIST_HEADERS,
       body: JSON.stringify({ query: NEXT_AIRING_EPISODE_QUERY, variables: { malId } }),
       next: { revalidate },
+      ...proxyDispatcher(),
     });
   } catch {
     return null;
@@ -83,9 +94,10 @@ export async function getAniListId(malId: number, revalidate = 86400): Promise<n
   try {
     response = await fetch(ANILIST_API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: ANILIST_HEADERS,
       body: JSON.stringify({ query: ANILIST_ID_QUERY, variables: { malId } }),
       next: { revalidate },
+      ...proxyDispatcher(),
     });
   } catch {
     return null;
@@ -157,9 +169,10 @@ export async function getAnimeExtras(malId: number, revalidate = 3600): Promise<
   try {
     response = await fetch(ANILIST_API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: ANILIST_HEADERS,
       body: JSON.stringify({ query: ANIME_EXTRAS_QUERY, variables: { malId } }),
       next: { revalidate },
+      ...proxyDispatcher(),
     });
   } catch {
     return null;
