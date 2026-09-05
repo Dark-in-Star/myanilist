@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
+import { Sparkles } from "lucide-react";
 import { AnimeListRow } from "./AnimeListRow";
 import { EmptyState } from "./EmptyState";
 import { ListFilterButton } from "./ListFilterButton";
@@ -9,10 +11,12 @@ import { ListSearchBar } from "./ListSearchBar";
 import { MediaTypeToggle } from "./MediaTypeToggle";
 import { RevealList } from "./RevealList";
 import { ScrollableTabRow } from "./ScrollableTabRow";
+import { SequelPromo } from "./SequelPromo";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ANIME_LIST_STATUS_LABELS } from "@/lib/format";
 import { matchesListFilters, matchesQuery } from "@/lib/list-filters";
+import { selectScannableEntries } from "@/lib/sequels";
 import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { clearSearchAndFilters, setFilters, setQuery, setSort, setStatus, setType } from "@/lib/store/listFiltersSlice";
 import type { AnimeNode, ListNode, ListStatus, MyListStatus } from "@/lib/types";
@@ -87,6 +91,8 @@ export function AnimeListBrowser({
       return acc;
     }, {});
   }, [entries]);
+
+  const scannableCount = useMemo(() => selectScannableEntries(entries).length, [entries]);
 
   const statusTypeFiltered = useMemo(() => {
     return entries
@@ -187,6 +193,13 @@ export function AnimeListBrowser({
             onTypeChange={(value) => dispatch(setType({ media: "anime", type: value }))}
           />
 
+          <Button asChild variant="outline" className="h-9 gap-1.5">
+            <Link href="/mylist/sequels">
+              <Sparkles className="size-4 text-accent" />
+              <span className="max-sm:sr-only">Find sequels</span>
+            </Link>
+          </Button>
+
           <ListSearchBar
             value={query}
             onChange={(value) => dispatch(setQuery({ media: "anime", query: value }))}
@@ -196,6 +209,8 @@ export function AnimeListBrowser({
           />
         </div>
       </div>
+
+      <SequelPromo scannableCount={scannableCount} />
 
       {filtered.length === 0 ? (
         statusTypeFiltered.length > 0 ? (

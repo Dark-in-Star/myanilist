@@ -266,11 +266,15 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ id
           {anime.recommendations.map((rec) => (
             <MediaRowItem key={rec.node.id}>
               <MediaCard
+                id={rec.node.id}
+                media="anime"
                 href={`/anime/${rec.node.id}`}
                 title={rec.node.title}
                 imageUrl={rec.node.main_picture?.large ?? rec.node.main_picture?.medium}
                 mean={rec.node.mean}
+                genres={rec.node.genres}
                 mediaType={rec.node.media_type}
+                listStatus={rec.node.my_list_status?.status}
               />
             </MediaRowItem>
           ))}

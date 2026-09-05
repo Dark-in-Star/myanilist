@@ -123,3 +123,57 @@ describe("getMyUserInfo", () => {
     await expect(getMyUserInfo()).resolves.toEqual({ id: 1, name: "tester" });
   });
 });
+
+describe("getAnimeList pagination", () => {
+  function mockFetchSequence(bodies: unknown[]) {
+    const fetchMock = vi.fn();
+    for (const body of bodies) {
+      fetchMock.mockResolvedValueOnce({ ok: true, status: 200, json: () => Promise.resolve(body) });
+    }
+    global.fetch = fetchMock as unknown as typeof fetch;
+    return fetchMock;
+  }
+
+  it("follows paging.next so a list longer than one page isn't truncated", async () => {
+    mockGetValidAccessToken.mockResolvedValue("token");
+
+    const first = Array.from({ length: 1000 }, (_, i) => ({ node: { id: i } }));
+    const second = [{ node: { id: 5000 } }, { node: { id: 5001 } }];
+
+    const fetchMock = mockFetchSequence([
+      { data: first, paging: { next: "https://api.myanimelist.net/next" } },
+      { data: second, paging: {} },
+    ]);
+
+    const result = await getAnimeList();
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.data).toHaveLength(1002);
+    // The entry that used to fall off the end must now be present.
+    expect(result.data.some((e) => (e.node as { id: number }).id === 5001)).toBe(true);
+
+    const secondUrl = String(fetchMock.mock.calls[1][0]);
+    expect(secondUrl).toContain("offset=1000");
+  });
+
+  it("asks for nsfw entries so the list isn't silently filtered", async () => {
+    mockGetValidAccessToken.mockResolvedValue("token");
+    const fetchMock = mockFetchSequence([{ data: [], paging: {} }]);
+
+    await getAnimeList();
+
+    // Without nsfw=true MAL omits gray/black entries, which made the sequel scan
+    // re-suggest R-rated titles the user had already completed.
+    expect(String(fetchMock.mock.calls[0][0])).toContain("nsfw=true");
+  });
+
+  it("stops after a single request when there is no next page", async () => {
+    mockGetValidAccessToken.mockResolvedValue("token");
+    const fetchMock = mockFetchSequence([{ data: [{ node: { id: 1 } }], paging: {} }]);
+
+    const result = await getAnimeList();
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(result.data).toHaveLength(1);
+  });
+});

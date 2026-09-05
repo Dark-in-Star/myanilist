@@ -70,11 +70,17 @@ async function apiGet<T>(path: string, options: FetchOptions = {}): Promise<T> {
   const { query, revalidate = 300, cache, token } = options;
   const url = `${BASE_URL}${path}${buildQuery(query)}`;
 
+  // Next's Data Cache keys on URL + fetch options only — request headers, including the
+  // per-user Authorization one, are not part of the key. Since the list field sets ask for
+  // my_list_status, a token-bearing response is personal and must never land in the shared
+  // cache, or one visitor's list state would be served to the next.
+  const perUser = token !== undefined;
+
   let response: Response;
   try {
     response = await fetch(url, {
-      cache,
-      next: cache ? undefined : { revalidate },
+      cache: perUser ? "no-store" : cache,
+      next: cache || perUser ? undefined : { revalidate },
       headers: authHeaders(token),
     });
   } catch {
@@ -96,17 +102,23 @@ async function requireToken(): Promise<string> {
   return token;
 }
 
+// my_list_status is only populated when a user token is attached (see the opportunistic
+// token in searchAnime/getAnimeRanking/getSeasonalAnime) — for a logged-out visitor MAL
+// simply omits it, which the cards read as "not on your list".
 export const ANIME_LIST_FIELDS =
-  "id,title,main_picture,mean,media_type,status,num_episodes,start_season,start_date,genres,rank,popularity";
+  "id,title,main_picture,mean,media_type,status,num_episodes,start_season,start_date,genres,rank,popularity,my_list_status";
 
 export const ANIME_DETAIL_FIELDS =
   "id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity," +
   "num_list_users,num_scoring_users,nsfw,media_type,status,genres,num_episodes,start_season," +
   "broadcast,source,average_episode_duration,rating,studios,background,related_anime,related_manga," +
-  "recommendations,pictures,my_list_status";
+  // Nested field lists: MAL returns only id/title/main_picture inside these sub-nodes
+  // otherwise, and my_list_status on each is what lets the cards show list state.
+  "recommendations{id,title,main_picture,mean,media_type,genres,my_list_status}," +
+  "pictures,my_list_status";
 
 export const MANGA_LIST_FIELDS =
-  "id,title,main_picture,mean,media_type,status,num_volumes,num_chapters,start_date,genres,rank,popularity";
+  "id,title,main_picture,mean,media_type,status,num_volumes,num_chapters,start_date,genres,rank,popularity,my_list_status";
 
 // The my-list cards also show an English title alongside the main (Japanese) one, which the
 // ranking/search field sets above don't request.
@@ -116,7 +128,9 @@ export const MY_MANGA_LIST_FIELDS = `${MANGA_LIST_FIELDS},alternative_titles`;
 export const MANGA_DETAIL_FIELDS =
   "id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity," +
   "num_list_users,num_scoring_users,nsfw,media_type,status,genres,num_volumes,num_chapters,authors{first_name,last_name}," +
-  "background,related_anime,related_manga,recommendations,pictures,my_list_status";
+  "background,related_anime,related_manga," +
+  "recommendations{id,title,main_picture,mean,media_type,genres,my_list_status}," +
+  "pictures,my_list_status";
 
 // MAL's client-ID-only (no user token) mode appears to always exclude NSFW-flagged
 // content (verified: searching a well-known Hentai title returns zero results with just
@@ -133,6 +147,19 @@ export async function getAnime(id: number, fields = ANIME_DETAIL_FIELDS) {
   // Optional auth: logged-in visitors get my_list_status back too.
   const token = (await getValidAccessToken()) ?? undefined;
   return apiGet<AnimeNode>(`/anime/${id}`, { query: { fields }, cache: "no-store", token });
+}
+
+// Relations effectively never change once a title is on MAL, so this narrow field set is
+// cached hard (a day) — a sequel scan re-reads the same anime across runs and would
+// otherwise burn a rate-limited request per list entry every time.
+export const ANIME_RELATION_FIELDS =
+  "id,title,related_anime{id,title,main_picture,mean,media_type,status,num_episodes,start_season,genres}";
+
+export async function getAnimeRelations(id: number) {
+  return apiGet<AnimeNode>(`/anime/${id}`, {
+    query: { fields: ANIME_RELATION_FIELDS },
+    revalidate: 86_400,
+  });
 }
 
 export async function getAnimeRanking(rankingType: AnimeRankingType, limit = 24, fields = ANIME_LIST_FIELDS, offset = 0) {
@@ -176,22 +203,47 @@ export async function getMangaRanking(rankingType: MangaRankingType, limit = 24,
   });
 }
 
-export async function getAnimeList(fields = MY_ANIME_LIST_FIELDS, limit = 1000) {
-  const token = await requireToken();
-  return apiGet<MalListResponse<ListNode<AnimeNode, MyListStatus>>>("/users/@me/animelist", {
-    query: { fields: `${fields},list_status`, limit },
-    cache: "no-store",
-    token,
-  });
+// MAL caps a single list page at 1000 entries and hands back paging.next for the rest.
+// Requesting limit=1000 and stopping there silently truncates any longer list, which is
+// invisible on the list screens but actively wrong for anything that reasons about the
+// *whole* list (the sequel scan treated missing entries as "not on your list").
+const LIST_PAGE_SIZE = 1000;
+
+// A guard against an unbounded loop if MAL ever returns a self-referential cursor.
+const MAX_LIST_PAGES = 20;
+
+async function fetchAllListPages<T>(path: string, fields: string, token: string): Promise<MalListResponse<T>> {
+  const data: T[] = [];
+  let offset = 0;
+
+  for (let page = 0; page < MAX_LIST_PAGES; page += 1) {
+    const chunk = await apiGet<MalListResponse<T>>(path, {
+      // nsfw=true is what makes this the user's *whole* list. MAL silently omits
+      // nsfw-flagged ("gray"/"black") entries otherwise — verified: a list reporting 366
+      // entries by default returns 399 with this on. Relations and detail lookups are not
+      // filtered the same way, so without it the sequel scan re-suggested R-rated titles
+      // the user had already completed, and list counts under-reported.
+      query: { fields: `${fields},list_status`, limit: LIST_PAGE_SIZE, offset, nsfw: true },
+      cache: "no-store",
+      token,
+    });
+
+    data.push(...chunk.data);
+    if (!chunk.paging?.next || chunk.data.length === 0) break;
+    offset += chunk.data.length;
+  }
+
+  return { data };
 }
 
-export async function getMangaList(fields = MY_MANGA_LIST_FIELDS, limit = 1000) {
+export async function getAnimeList(fields = MY_ANIME_LIST_FIELDS) {
   const token = await requireToken();
-  return apiGet<MalListResponse<ListNode<MangaNode, MyMangaListStatusNode>>>("/users/@me/mangalist", {
-    query: { fields: `${fields},list_status`, limit },
-    cache: "no-store",
-    token,
-  });
+  return fetchAllListPages<ListNode<AnimeNode, MyListStatus>>("/users/@me/animelist", fields, token);
+}
+
+export async function getMangaList(fields = MY_MANGA_LIST_FIELDS) {
+  const token = await requireToken();
+  return fetchAllListPages<ListNode<MangaNode, MyMangaListStatusNode>>("/users/@me/mangalist", fields, token);
 }
 
 export async function getMyUserInfo(fields = "anime_statistics") {

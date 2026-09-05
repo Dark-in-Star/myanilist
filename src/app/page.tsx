@@ -37,6 +37,7 @@ async function AnimeRankingRow({
             genres={node.genres}
             mediaType={node.media_type}
             rank={ranking.rank}
+            listStatus={node.my_list_status?.status}
             priority={priority && index === 0}
           />
         </MediaRowItem>
@@ -69,6 +70,7 @@ async function MangaRankingRow({
             genres={node.genres}
             mediaType={node.media_type}
             rank={ranking.rank}
+            listStatus={node.my_list_status?.status}
           />
         </MediaRowItem>
       ))}
