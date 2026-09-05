@@ -96,14 +96,25 @@ export async function getAniListId(malId: number, revalidate = 86400): Promise<n
       body: JSON.stringify({ query: ANILIST_ID_QUERY, variables: { malId } }),
       next: { revalidate },
     });
-  } catch {
+  } catch (error) {
+    // Logged rather than swallowed silently: when this returns null the caller can only
+    // report a generic failure, so without this line there is no way to tell from the
+    // deployed logs whether AniList or the stream source was the one that broke.
+    console.error("AniList id lookup could not connect", { malId, error });
     return null;
   }
 
-  if (!response.ok) return null;
+  if (!response.ok) {
+    console.error("AniList id lookup failed", { malId, status: response.status });
+    return null;
+  }
 
   const json = (await response.json()) as AniListNextAiringResponse;
-  return json.data?.Media?.id ?? null;
+  const id = json.data?.Media?.id ?? null;
+  if (id === null) {
+    console.error("AniList returned no media for this id", { malId, errors: json.errors });
+  }
+  return id;
 }
 
 const ANIME_EXTRAS_QUERY = `
