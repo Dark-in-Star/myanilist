@@ -22,15 +22,19 @@ async function AnimeRankingRow({
   priority?: boolean;
 }) {
   const result = await getAnimeRanking(rankingType, 12);
+  console.log(result);
   return (
     <MediaRow title={title} viewAllHref={viewAllHref}>
-      {result.data.map(({ node, ranking }, index) => (
+      {result.data.map(({ node, ranking },index) => (
         <MediaRowItem key={node.id}>
           <MediaCard
+            id={node.id}
+            media="anime"
             href={`/anime/${node.id}`}
             title={node.title}
             imageUrl={node.main_picture?.large ?? node.main_picture?.medium}
             mean={node.mean}
+            genres={node.genres}
             mediaType={node.media_type}
             rank={ranking.rank}
             priority={priority && index === 0}
@@ -56,10 +60,13 @@ async function MangaRankingRow({
       {result.data.map(({ node, ranking }) => (
         <MediaRowItem key={node.id}>
           <MediaCard
+            id={node.id}
+            media="manga"
             href={`/manga/${node.id}`}
             title={node.title}
             imageUrl={node.main_picture?.large ?? node.main_picture?.medium}
             mean={node.mean}
+            genres={node.genres}
             mediaType={node.media_type}
             rank={ranking.rank}
           />

@@ -123,10 +123,13 @@ export function MediaLoadMoreGrid({
           {filtered.map((item) => (
             <MediaCard
               key={item.id}
+              id={item.id}
+              media={media}
               href={item.href}
               title={item.title}
               imageUrl={item.imageUrl}
               mean={item.mean}
+              genres={item.genres}
               mediaType={item.mediaType}
               rank={item.rank}
             />

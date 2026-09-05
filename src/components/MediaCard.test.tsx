@@ -30,4 +30,31 @@ describe("MediaCard", () => {
     render(<MediaCard href="/manga/1" title="Monster" mediaType="manga" />);
     expect(screen.getByText("MANGA")).toBeInTheDocument();
   });
+
+  it("renders genre chips and a +N overflow indicator", () => {
+    render(
+      <MediaCard
+        href="/anime/1"
+        title="Show"
+        genres={[
+          { id: 1, name: "Action" },
+          { id: 2, name: "Adventure" },
+          { id: 3, name: "Drama" },
+          { id: 4, name: "Fantasy" },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText("Action")).toBeInTheDocument();
+    expect(screen.getByText("Drama")).toBeInTheDocument();
+    expect(screen.getByText("+1")).toBeInTheDocument();
+  });
+
+  it("offers an add-to-list button only when an id is supplied", () => {
+    const { rerender } = render(<MediaCard href="/anime/7" title="Show" />);
+    expect(screen.queryByRole("button", { name: /add Show to your list/i })).not.toBeInTheDocument();
+
+    rerender(<MediaCard href="/anime/7" title="Show" id={7} media="anime" />);
+    expect(screen.getByRole("button", { name: /add Show to your list/i })).toBeInTheDocument();
+  });
 });

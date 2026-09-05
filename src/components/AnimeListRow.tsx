@@ -10,8 +10,7 @@ import type { AnimeNode, MyListStatus } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { ScoreBadge } from "./ScoreBadge";
 import { AnimeListEditModal } from "./AnimeListEditModal";
-
-const MAX_VISIBLE_GENRES = 3;
+import { MAX_VISIBLE_GENRES } from "@/lib/constants";
 
 export function AnimeListRow({
   node,
